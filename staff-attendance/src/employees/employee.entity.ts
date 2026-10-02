@@ -7,8 +7,8 @@ import {
   OneToOne,
   OneToMany,
 } from 'typeorm';
-import { User } from '../users/user.entity';
-import { Attendance } from '../attendances/attendance.entity';
+import { User } from '../users/user.entity.js';
+import { Attendance } from '../attendances/attendance.entity.js';
 
 export enum EmployeeStatus {
   ACTIVE = 'ACTIVE',

@@ -2,13 +2,13 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, FindManyOptions, Like } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Employee, EmployeeStatus } from './employee.entity';
-import { User, UserRole } from '../users/user.entity';
+import { Employee, EmployeeStatus } from './employee.entity.js';
+import { User, UserRole } from '../users/user.entity.js';
 import {
   CreateEmployeeDto,
   UpdateEmployeeDto,
   UpdateEmployeeStatusDto,
-} from './dto/employee.dto';
+} from './dto/employee.dto.js';
 
 @Injectable()
 export class EmployeesService {
@@ -17,7 +17,7 @@ export class EmployeesService {
     private employeeRepository: Repository<Employee>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createEmployeeDto: CreateEmployeeDto, role: UserRole = UserRole.EMPLOYEE) {
     const employeeExists = await this.employeeRepository.findOne({

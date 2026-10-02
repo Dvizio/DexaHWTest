@@ -1,5 +1,5 @@
 import { IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
-import { EmployeeStatus } from '../../employees/employee.entity';
+import { EmployeeStatus } from '../../employees/employee.entity.js';
 
 export class CreateEmployeeDto {
   @IsString()

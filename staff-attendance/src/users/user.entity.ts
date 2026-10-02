@@ -7,7 +7,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { Employee } from '../employees/employee.entity';
+import { Employee } from '../employees/employee.entity.js';
 
 export enum UserRole {
   EMPLOYEE = 'EMPLOYEE',

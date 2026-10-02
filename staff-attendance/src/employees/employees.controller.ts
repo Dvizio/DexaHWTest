@@ -10,22 +10,22 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { EmployeesService } from './employees.service';
+import { EmployeesService } from './employees.service.js';
 import {
   CreateEmployeeDto,
   UpdateEmployeeDto,
   UpdateEmployeeStatusDto,
-} from './dto/employee.dto';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '../users/user.entity';
-import { EmployeeStatus } from './employee.entity';
+} from './dto/employee.dto.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { UserRole } from '../users/user.entity.js';
+import { EmployeeStatus } from './employee.entity.js';
 
 @Controller('employees')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(private readonly employeesService: EmployeesService) { }
 
   @Get('me')
   @Roles(UserRole.EMPLOYEE, UserRole.HRD)

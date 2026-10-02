@@ -4,37 +4,44 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User } from '../users/user.entity.js';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private configService: ConfigService,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {
-    super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET'),
-    });
-  }
+    constructor(
+        private configService: ConfigService,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
+    ) {
+        const secret = configService.get<string>('JWT_SECRET');
 
-  async validate(payload: any) {
-    const user = await this.userRepository.findOne({
-      where: { id: payload.sub },
-      relations: { employee: true },
-    });
+        if (!secret) {
+            throw new Error('JWT_SECRET is not configured');
+        }
 
-    if (!user || !user.is_active || user.employee?.status === 'INACTIVE') {
-      throw new UnauthorizedException('User is inactive or unauthorized');
+        super({
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
+            secretOrKey: secret,
+        });
+
     }
 
-    return {
-      userId: payload.sub,
-      employeeId: payload.employeeId,
-      role: payload.role,
-      username: user.username,
-    };
-  }
+    async validate(payload: any) {
+        const user = await this.userRepository.findOne({
+            where: { id: payload.sub },
+            relations: { employee: true },
+        });
+
+        if (!user || !user.is_active || user.employee?.status === 'INACTIVE') {
+            throw new UnauthorizedException('User is inactive or unauthorized');
+        }
+
+        return {
+            userId: payload.sub,
+            employeeId: payload.employeeId,
+            role: payload.role,
+            username: user.username,
+        };
+    }
 }
