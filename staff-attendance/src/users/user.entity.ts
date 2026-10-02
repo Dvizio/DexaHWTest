@@ -7,7 +7,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { Employee } from '../employees/employee.entity.js';
+import type { Employee } from '../employees/employee.entity.js';
 
 export enum UserRole {
   EMPLOYEE = 'EMPLOYEE',
@@ -44,7 +44,7 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-  @OneToOne(() => Employee, (employee) => employee.user, { onDelete: 'CASCADE' })
+  @OneToOne('Employee', 'user', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'employee_id' })
   employee: Employee;
 }

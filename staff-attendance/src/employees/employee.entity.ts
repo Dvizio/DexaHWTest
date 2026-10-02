@@ -7,7 +7,7 @@ import {
   OneToOne,
   OneToMany,
 } from 'typeorm';
-import { User } from '../users/user.entity.js';
+import type { User } from '../users/user.entity.js';
 import { Attendance } from '../attendances/attendance.entity.js';
 
 export enum EmployeeStatus {
@@ -51,7 +51,7 @@ export class Employee {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-  @OneToOne(() => User, (user) => user.employee)
+  @OneToOne('User', 'employee')
   user: User;
 
   @OneToMany(() => Attendance, (attendance) => attendance.employee)

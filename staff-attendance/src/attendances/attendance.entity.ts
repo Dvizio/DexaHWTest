@@ -9,7 +9,7 @@ import {
   Index,
   Unique,
 } from 'typeorm';
-import { Employee } from '../employees/employee.entity.js';
+import type { Employee } from '../employees/employee.entity.js';
 
 export enum AttendanceStatus {
   PRESENT = 'PRESENT',
@@ -69,7 +69,7 @@ export class Attendance {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-  @ManyToOne(() => Employee, (employee) => employee.attendances, {
+  @ManyToOne('Employee', 'attendances', {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'employee_id' })
