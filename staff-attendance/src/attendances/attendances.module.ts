@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MulterModule } from '@nestjs/platform-express';
-import { Employee } from '../employees/employee.entity';
-import { Attendance } from './attendance.entity';
-import { AttendancesService } from './attendances.service';
-import { AttendancesController } from './attendances.controller';
+import { Employee } from '../employees/employee.entity.js';
+import { Attendance } from './attendance.entity.js';
+import { AttendancesService } from './attendances.service.js';
+import { AttendancesController } from './attendances.controller.js';
 
 @Module({
   imports: [
@@ -15,4 +15,4 @@ import { AttendancesController } from './attendances.controller';
   providers: [AttendancesService],
   exports: [AttendancesService],
 })
-export class AttendancesModule {}
+export class AttendancesModule { }

@@ -7,11 +7,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, MoreThan, LessThan, Between } from 'typeorm';
-import { Employee, EmployeeStatus } from '../employees/employee.entity';
-import { Attendance, AttendanceStatus } from './attendance.entity';
-import { CheckInDto } from './dto/check-in.dto';
-import { AttendanceFilterDto } from './dto/attendance-filter.dto';
+import { Employee, EmployeeStatus } from '../employees/employee.entity.js';
+import { Attendance, AttendanceStatus } from './attendance.entity.js';
+import { CheckInDto } from './dto/check-in.dto.js';
+import { AttendanceFilterDto } from './dto/attendance-filter.dto.js';
 import moment from 'moment';
+import { CheckOutDto } from './dto/check-out.dto.js';
 
 @Injectable()
 export class AttendancesService {
@@ -20,7 +21,7 @@ export class AttendancesService {
     private employeeRepository: Repository<Employee>,
     @InjectRepository(Attendance)
     private attendanceRepository: Repository<Attendance>,
-  ) {}
+  ) { }
 
   async checkIn(
     employeeId: number,
@@ -64,8 +65,8 @@ export class AttendancesService {
       attendance_date: attendanceDate,
       check_in_at: checkInTime,
       check_in_photo: file ? file.path : '',
-      latitude: checkInDto.latitude,
-      longitude: checkInDto.longitude,
+      check_in_latitude: checkInDto.latitude,
+      check_in_longitude: checkInDto.longitude,
       status,
       notes: checkInDto.notes,
     });
@@ -73,6 +74,55 @@ export class AttendancesService {
     await this.attendanceRepository.save(attendance);
 
     const { employee_id, ...result } = attendance;
+    return result;
+  }
+
+  async checkOut(
+    employeeId: number,
+    checkOutDto: CheckOutDto,
+    file: any,
+  ) {
+    const employee = await this.employeeRepository.findOne({
+      where: { id: employeeId },
+    });
+
+    if (!employee) {
+      throw new NotFoundException('Employee not found');
+    }
+
+    if (employee.status === EmployeeStatus.INACTIVE) {
+      throw new ForbiddenException('Employee is inactive');
+    }
+
+    const attendanceDate = moment().format('YYYY-MM-DD');
+    const checkOutTime = moment().toDate();
+    const attendanceTime = moment(checkOutTime).format('HH:mm:ss');
+
+    const lateTime = process.env.ATTENDANCE_LATE_TIME || '09:00';
+    const status = moment(attendanceTime, 'HH:mm:ss').isAfter(lateTime)
+      ? AttendanceStatus.LATE
+      : AttendanceStatus.PRESENT;
+
+    const attendanceToUpdate = await this.attendanceRepository.findOne({
+      where: {
+        employee_id: employeeId,
+        attendance_date: attendanceDate,
+      },
+    });
+
+    if (!attendanceToUpdate) {
+      throw new NotFoundException('Attendance not found');
+    }
+
+    attendanceToUpdate.check_out_at = checkOutTime;
+    attendanceToUpdate.check_out_photo = file ? file.path : '';
+    attendanceToUpdate.check_out_latitude = checkOutDto.latitude;
+    attendanceToUpdate.check_out_longitude = checkOutDto.longitude;
+
+
+    const savedAttendance = await this.attendanceRepository.save(attendanceToUpdate);
+
+    const { employee_id, ...result } = savedAttendance;
     return result;
   }
 

@@ -18,6 +18,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { AttendancesService } from './attendances.service.js';
 import { CheckInDto } from './dto/check-in.dto.js';
+import { CheckOutDto } from './dto/check-out.dto.js';
 import { AttendanceFilterDto } from './dto/attendance-filter.dto.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
@@ -66,7 +67,7 @@ const storage = diskStorage({
 @Controller('attendances')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AttendancesController {
-  constructor(private readonly attendancesService: AttendancesService) {}
+  constructor(private readonly attendancesService: AttendancesService) { }
 
   @Post('check-in')
   @Roles(UserRole.EMPLOYEE)
@@ -86,6 +87,26 @@ export class AttendancesController {
       throw new BadRequestException('Photo file is required');
     }
     return this.attendancesService.checkIn(user.employeeId, checkInDto, file);
+  }
+
+  @Post('check-out')
+  @Roles(UserRole.EMPLOYEE)
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage,
+      fileFilter,
+      limits: { fileSize: maxFileSize },
+    }),
+  )
+  async checkOut(
+    @CurrentUser() user: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() checkOutDto: CheckOutDto,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Photo file is required');
+    }
+    return this.attendancesService.checkOut(user.employeeId, checkOutDto, file);
   }
 
   @Get('me')

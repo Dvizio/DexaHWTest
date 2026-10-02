@@ -33,14 +33,26 @@ export class Attendance {
   @Column({ type: 'timestamp', name: 'check_in_at' })
   check_in_at: Date;
 
+  @Column({ type: 'timestamp', name: 'check_out_at' })
+  check_out_at: Date;
+
+  @Column({ name: 'check_out_photo' })
+  check_out_photo: string;
+
   @Column({ name: 'check_in_photo' })
   check_in_photo: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 7 })
-  latitude: number;
+  check_in_latitude: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 7 })
-  longitude: number;
+  check_in_longitude: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 7 })
+  check_out_latitude: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 7 })
+  check_out_longitude: number;
 
   @Column({
     type: 'enum',
