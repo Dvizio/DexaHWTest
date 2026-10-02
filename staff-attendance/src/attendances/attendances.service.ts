@@ -40,12 +40,13 @@ export class AttendancesService {
       throw new ForbiddenException('Employee is inactive');
     }
 
-    const attendanceDate = moment().format('YYYY-MM-DD');
-    const checkInTime = moment().toDate();
-    const attendanceTime = moment(checkInTime).format('HH:mm:ss');
+    const now = moment();
+    const attendanceDate = now.format('YYYY-MM-DD'); // string type
+    const checkInTime = now.format('HH:mm');
+    const attendanceTime = now.format('HH:mm:ss');
 
     const lateTime = process.env.ATTENDANCE_LATE_TIME || '09:00';
-    const status = moment(attendanceTime, 'HH:mm:ss').isAfter(lateTime)
+    const status = moment(attendanceTime, 'HH:mm:ss').isAfter(moment(lateTime, 'HH:mm'))
       ? AttendanceStatus.LATE
       : AttendanceStatus.PRESENT;
 
@@ -67,6 +68,10 @@ export class AttendancesService {
       check_in_photo: file ? file.path : '',
       check_in_latitude: checkInDto.latitude,
       check_in_longitude: checkInDto.longitude,
+      check_out_at: null,
+      check_out_photo: null,
+      check_out_latitude: null,
+      check_out_longitude: null,
       status,
       notes: checkInDto.notes,
     });
@@ -94,14 +99,9 @@ export class AttendancesService {
       throw new ForbiddenException('Employee is inactive');
     }
 
-    const attendanceDate = moment().format('YYYY-MM-DD');
-    const checkOutTime = moment().toDate();
-    const attendanceTime = moment(checkOutTime).format('HH:mm:ss');
-
-    const lateTime = process.env.ATTENDANCE_LATE_TIME || '09:00';
-    const status = moment(attendanceTime, 'HH:mm:ss').isAfter(lateTime)
-      ? AttendanceStatus.LATE
-      : AttendanceStatus.PRESENT;
+    const now = moment();
+    const attendanceDate = now.format('YYYY-MM-DD'); // string type
+    const checkOutTime = now.toDate(); // Date object type
 
     const attendanceToUpdate = await this.attendanceRepository.findOne({
       where: {
@@ -118,7 +118,6 @@ export class AttendancesService {
     attendanceToUpdate.check_out_photo = file ? file.path : '';
     attendanceToUpdate.check_out_latitude = checkOutDto.latitude;
     attendanceToUpdate.check_out_longitude = checkOutDto.longitude;
-
 
     const savedAttendance = await this.attendanceRepository.save(attendanceToUpdate);
 

@@ -33,12 +33,6 @@ export class Attendance {
   @Column({ type: 'timestamp', name: 'check_in_at' })
   check_in_at: Date;
 
-  @Column({ type: 'timestamp', name: 'check_out_at' })
-  check_out_at: Date;
-
-  @Column({ name: 'check_out_photo' })
-  check_out_photo: string;
-
   @Column({ name: 'check_in_photo' })
   check_in_photo: string;
 
@@ -48,11 +42,43 @@ export class Attendance {
   @Column({ type: 'decimal', precision: 10, scale: 7 })
   check_in_longitude: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 7 })
-  check_out_latitude: number;
+  @Column({
+    type: 'timestamp',
+    name: 'check_out_at',
+    nullable: true,
+    default: null,
+  })
+  check_out_at: Date | null;
 
-  @Column({ type: 'decimal', precision: 10, scale: 7 })
-  check_out_longitude: number;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    name: 'check_out_photo',
+    nullable: true,
+    default: null,
+  })
+  check_out_photo: string | null;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 7,
+    name: 'check_out_latitude',
+    nullable: true,
+    default: null,
+  })
+  check_out_latitude: number | null;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 7,
+    name: 'check_out_longitude',
+    nullable: true,
+    default: null,
+  })
+  check_out_longitude: number | null;
 
   @Column({
     type: 'enum',

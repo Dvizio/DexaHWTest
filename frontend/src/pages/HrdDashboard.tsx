@@ -730,8 +730,13 @@ export const HrdDashboard: React.FC = () => {
                             className="inline-flex items-center gap-1 text-blue-400 hover:underline"
                           >
                             <MapPin className="w-3 h-3" />
-                            {att.check_in_latitude?.toFixed(4)},{' '}
-                            {att.check_in_longitude?.toFixed(4)}
+                            {typeof att.check_in_latitude === 'number'
+                              ? att.check_in_latitude.toFixed(4)
+                              : Number(att.check_in_latitude || 0).toFixed(4)}
+                            ,{' '}
+                            {typeof att.check_in_longitude === 'number'
+                              ? att.check_in_longitude.toFixed(4)
+                              : Number(att.check_in_longitude || 0).toFixed(4)}
                           </a>
                         </td>
                         <td className="py-3 px-4 text-slate-300 max-w-xs truncate">

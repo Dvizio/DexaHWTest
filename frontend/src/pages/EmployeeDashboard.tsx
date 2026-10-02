@@ -600,8 +600,13 @@ export const EmployeeDashboard: React.FC = () => {
                           className="inline-flex items-center gap-1 text-blue-400 hover:underline"
                         >
                           <MapPin className="w-3 h-3" />
-                          {record.check_in_latitude?.toFixed(4)},{' '}
-                          {record.check_in_longitude?.toFixed(4)}
+                          {typeof record.check_in_latitude === 'number'
+                            ? record.check_in_latitude.toFixed(4)
+                            : Number(record.check_in_latitude || 0).toFixed(4)}
+                          ,{' '}
+                          {typeof record.check_in_longitude === 'number'
+                            ? record.check_in_longitude.toFixed(4)
+                            : Number(record.check_in_longitude || 0).toFixed(4)}
                         </a>
                       </td>
                       <td className="py-3 px-4 text-slate-300 max-w-xs truncate">
