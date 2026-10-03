@@ -16,6 +16,8 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+import * as crypto from 'crypto';
+import moment from 'moment';
 import { AttendancesService } from './attendances.service.js';
 import { CheckInDto } from './dto/check-in.dto.js';
 import { CheckOutDto } from './dto/check-out.dto.js';
@@ -24,6 +26,18 @@ import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { UserRole } from '../users/user.entity.js';
+
+export type AttendanceAction = 'CHECKIN' | 'CHECKOUT';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    userId?: number;
+    employeeId?: number;
+    username?: string;
+    role?: string;
+    sub?: number;
+  };
+}
 
 const allowedMimes = ['image/jpeg', 'image/png'];
 const maxFileSize = 5 * 1024 * 1024;
@@ -42,27 +56,42 @@ const fileFilter = (
   cb(null, true);
 };
 
-const storage = diskStorage({
-  destination: (
-    req: Request,
-    file: Express.Multer.File,
-    cb: (error: Error | null, destination: string) => void,
-  ) => {
-    const dir = process.env.UPLOAD_DIR || 'uploads/attendance';
-    cb(null, dir);
-  },
-  filename: (
-    req: Request,
-    file: Express.Multer.File,
-    cb: (error: Error | null, filename: string) => void,
-  ) => {
-    const randomName = Array(32)
-      .fill(null)
-      .map(() => Math.round(Math.random() * 16).toString(16))
-      .join('');
-    cb(null, `${randomName}${extname(file.originalname)}`);
-  },
-});
+export const createAttendanceStorage = (action: AttendanceAction) =>
+  diskStorage({
+    destination: (
+      req: Request,
+      file: Express.Multer.File,
+      cb: (error: Error | null, destination: string) => void,
+    ) => {
+      const dir = process.env.UPLOAD_DIR || 'uploads/attendance';
+      cb(null, dir);
+    },
+    filename: (
+      req: AuthenticatedRequest,
+      file: Express.Multer.File,
+      cb: (error: Error | null, filename: string) => void,
+    ) => {
+      // 1. Authenticated User Identifier (with sanitization)
+      const rawUserIdentifier =
+        req.user?.username ||
+        (req.user?.employeeId ? `EMP_${req.user.employeeId}` : 'anonymous');
+      const sanitizedUsername = rawUserIdentifier.replace(/[^a-zA-Z0-9_-]/g, '');
+
+      // 2. Formatted timestamp YYYYMMDD_HHMMSS
+      const timestamp = moment().format('YYYYMMDD_HHmmss');
+
+      // 3. 4-character random hex suffix to prevent collisions
+      const randomSuffix = crypto.randomBytes(2).toString('hex');
+
+      // 4. File extension in lowercase
+      const ext = extname(file.originalname).toLowerCase() || '.jpg';
+
+      // 5. Output format: YYYYMMDD_HHMMSS_{RANDOM4}_{USERNAME}_{ACTION}{EXTENSION}
+      const finalFileName = `${timestamp}_${randomSuffix}_${sanitizedUsername}_${action}${ext}`;
+
+      cb(null, finalFileName);
+    },
+  });
 
 @Controller('attendances')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -73,7 +102,7 @@ export class AttendancesController {
   @Roles(UserRole.EMPLOYEE)
   @UseInterceptors(
     FileInterceptor('photo', {
-      storage,
+      storage: createAttendanceStorage('CHECKIN'),
       fileFilter,
       limits: { fileSize: maxFileSize },
     }),
@@ -93,7 +122,7 @@ export class AttendancesController {
   @Roles(UserRole.EMPLOYEE)
   @UseInterceptors(
     FileInterceptor('photo', {
-      storage,
+      storage: createAttendanceStorage('CHECKOUT'),
       fileFilter,
       limits: { fileSize: maxFileSize },
     }),

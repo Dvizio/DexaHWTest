@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Camera,
   X,
@@ -32,15 +32,15 @@ export const WebcamModal: React.FC<WebcamModalProps> = ({
 
   // Location state
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('loading');
   const [locationError, setLocationError] = useState<string>('');
 
   // Camera state
   const [cameraError, setCameraError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Acquire Geolocation
-  const fetchLocation = useCallback(() => {
+  // Acquire Geolocation helper
+  const acquireLocation = () => {
     if (!navigator.geolocation) {
       setLocationStatus('error');
       setLocationError('Geolocation is not supported by your browser.');
@@ -64,44 +64,15 @@ export const WebcamModal: React.FC<WebcamModalProps> = ({
           setLocationError('Location permission denied. Please allow location access.');
         } else {
           setLocationError('Could not acquire GPS location. Using default fallback.');
-          // Fallback coordinate (e.g. Jakarta default) if browser is strict
           setCoords({ latitude: -6.2088, longitude: 106.8456 });
         }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  }, []);
+  };
 
-  // Start Camera Stream
-  const startCamera = async () => {
-    setCameraError('');
-    try {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: false,
-      });
-
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-    } catch (err: any) {
-      console.error('Camera access error:', err);
-      setCameraError(
-        err.name === 'NotAllowedError'
-          ? 'Camera permission denied. Please allow camera permissions in your browser.'
-          : 'Unable to access your webcam. Please ensure a camera is connected and not in use by another app.'
-      );
-    }
+  const handleRefreshLocation = () => {
+    acquireLocation();
   };
 
   // Stop Camera Stream
@@ -115,21 +86,123 @@ export const WebcamModal: React.FC<WebcamModalProps> = ({
     }
   };
 
+  // Start Camera Stream
+  const startCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+    }
+
+    navigator.mediaDevices
+      ?.getUserMedia({
+        video: {
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      })
+      .then((stream) => {
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('Camera access error:', err);
+        const isNotAllowed = err instanceof Error && err.name === 'NotAllowedError';
+        setCameraError(
+          isNotAllowed
+            ? 'Camera permission denied. Please allow camera permissions in your browser.'
+            : 'Unable to access your webcam. Please ensure a camera is connected and not in use by another app.'
+        );
+      });
+  };
+
+  // Reset Modal Form State
+  const resetState = () => {
+    if (capturedPreview) {
+      URL.revokeObjectURL(capturedPreview);
+    }
+    setCapturedBlob(null);
+    setCapturedPreview(null);
+    setNotes('');
+    setCameraError('');
+  };
+
+  const handleClose = () => {
+    resetState();
+    onClose();
+  };
+
   useEffect(() => {
-    if (isOpen) {
-      setCapturedBlob(null);
-      setCapturedPreview(null);
-      setNotes('');
-      fetchLocation();
-      startCamera();
-    } else {
+    if (!isOpen) {
       stopCamera();
+      return;
+    }
+
+    let isMounted = true;
+
+    navigator.mediaDevices
+      ?.getUserMedia({
+        video: {
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      })
+      .then((stream) => {
+        if (!isMounted) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        console.error('Camera access error:', err);
+        const isNotAllowed = err instanceof Error && err.name === 'NotAllowedError';
+        setCameraError(
+          isNotAllowed
+            ? 'Camera permission denied. Please allow camera permissions in your browser.'
+            : 'Unable to access your webcam. Please ensure a camera is connected and not in use by another app.'
+        );
+      });
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (!isMounted) return;
+          setCoords({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setLocationStatus('success');
+        },
+        (error) => {
+          if (!isMounted) return;
+          setLocationStatus('error');
+          if (error.code === error.PERMISSION_DENIED) {
+            setLocationError('Location permission denied. Please allow location access.');
+          } else {
+            setLocationError('Could not acquire GPS location. Using default fallback.');
+            setCoords({ latitude: -6.2088, longitude: 106.8456 });
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
     }
 
     return () => {
+      isMounted = false;
       stopCamera();
     };
-  }, [isOpen, fetchLocation]);
+  }, [isOpen]);
 
   // Capture Photo snapshot from Video frame
   const capturePhoto = () => {
@@ -190,8 +263,8 @@ export const WebcamModal: React.FC<WebcamModalProps> = ({
       }
 
       await onSubmit(formData);
-      onClose();
-    } catch (err) {
+      handleClose();
+    } catch {
       // Error handled in parent
     } finally {
       setIsSubmitting(false);
@@ -221,7 +294,7 @@ export const WebcamModal: React.FC<WebcamModalProps> = ({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isSubmitting}
             className="text-gray-500 hover:text-black p-1 rounded-md hover:bg-gray-300 transition"
           >
@@ -300,7 +373,7 @@ export const WebcamModal: React.FC<WebcamModalProps> = ({
                 <span>GPS Geolocation</span>
               </div>
               <button
-                onClick={fetchLocation}
+                onClick={handleRefreshLocation}
                 disabled={locationStatus === 'loading' || isSubmitting}
                 title="Refresh GPS Location"
                 className="text-gray-500 hover:text-black p-0.5 transition"
@@ -354,7 +427,7 @@ export const WebcamModal: React.FC<WebcamModalProps> = ({
         {/* Modal Footer */}
         <div className="px-5 py-3 border-t border-gray-300 bg-gray-50 flex items-center justify-end gap-2">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isSubmitting}
             className="px-3 py-1.5 rounded-md text-xs font-semibold text-gray-500 hover:text-black hover:bg-gray-300 transition"
           >
