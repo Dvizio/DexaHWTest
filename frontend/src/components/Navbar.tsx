@@ -21,12 +21,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <header className="sticky top-0 z-30 bg-slate-900 border-b border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Title */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-9 h-9 rounded-md bg-blue-600 flex items-center justify-center">
               <Clock className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -42,12 +42,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* User Profile & Actions */}
           <div className="flex items-center gap-3 sm:gap-4">
             {user && (
-              <div className="flex items-center gap-2 sm:gap-3 bg-slate-800/80 border border-slate-700/60 rounded-full py-1.5 px-3">
-                <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-slate-300">
+              <div className="flex items-center gap-2 sm:gap-3 bg-slate-800 border border-slate-700/60 rounded-md py-1 px-3">
+                <div className="w-6 h-6 rounded-md bg-slate-700 flex items-center justify-center text-slate-300">
                   {user.role === 'HRD' ? (
-                    <ShieldCheck className="w-4 h-4 text-indigo-400" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
                   ) : (
-                    <UserIcon className="w-4 h-4 text-emerald-400" />
+                    <UserIcon className="w-3.5 h-3.5 text-emerald-400" />
                   )}
                 </div>
                 <div className="text-left hidden sm:block">
@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </div>
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
                     user.role === 'HRD'
                       ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
                       : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
@@ -70,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={handleLogout}
               title="Sign out"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-red-600/20 border border-slate-700 hover:border-red-500/40 transition-all duration-200 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-red-600/20 border border-slate-700 hover:border-red-500/40 transition cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5 text-red-400" />
               <span className="hidden sm:inline">Logout</span>

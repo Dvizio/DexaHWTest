@@ -27,6 +27,7 @@ import {
   Check,
   Mail,
   Phone,
+  Key,
 } from 'lucide-react';
 
 export const HrdDashboard: React.FC = () => {
@@ -98,6 +99,12 @@ export const HrdDashboard: React.FC = () => {
   } | null>(null);
 
   const [copied, setCopied] = useState<boolean>(false);
+
+  // Password Modal State
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
+  const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordLoading, setPasswordLoading] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // Fetch Employees List
   const fetchEmployees = useCallback(
@@ -346,7 +353,7 @@ export const HrdDashboard: React.FC = () => {
         {/* Global Notification */}
         {notification && (
           <div
-            className={`p-4 rounded-xl flex items-center justify-between border ${notification.type === 'success'
+            className={`p-4 rounded-md flex items-center justify-between border ${notification.type === 'success'
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                 : 'bg-red-500/10 border-red-500/30 text-red-300'
               }`}
@@ -369,33 +376,47 @@ export const HrdDashboard: React.FC = () => {
         )}
 
         {/* Top Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-          <button
-            onClick={() => setActiveTab('employees')}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'employees'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
-              }`}
-          >
-            <Users className="w-4 h-4" />
-            Employee Management
-          </button>
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('employees')}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'employees'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
+                }`}
+            >
+              <Users className="w-4 h-4" />
+              Employee Management
+            </button>
+
+            <button
+              onClick={() => setActiveTab('attendances')}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'attendances'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
+                }`}
+            >
+              <ClipboardList className="w-4 h-4" />
+              Attendance Monitoring
+            </button>
+          </div>
 
           <button
-            onClick={() => setActiveTab('attendances')}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'attendances'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
-              }`}
+            onClick={() => {
+              setPasswordError(null);
+              setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+              setIsPasswordModalOpen(true);
+            }}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition cursor-pointer"
           >
-            <ClipboardList className="w-4 h-4" />
-            Attendance Monitoring
+            <Key className="w-4 h-4 text-blue-400" />
+            Change Password
           </button>
         </div>
 
         {/* TAB 1: EMPLOYEE MANAGEMENT */}
         {activeTab === 'employees' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6  space-y-4">
             {/* Header & Filter Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
               <div>
@@ -417,7 +438,7 @@ export const HrdDashboard: React.FC = () => {
                     placeholder="Search by name..."
                     value={empSearch}
                     onChange={(e) => setEmpSearch(e.target.value)}
-                    className="bg-slate-950 border border-slate-700/80 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 w-44 sm:w-56 transition"
+                    className="bg-slate-950 border border-slate-700/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 w-44 sm:w-56 transition"
                   />
                 </div>
 
@@ -425,7 +446,7 @@ export const HrdDashboard: React.FC = () => {
                 <select
                   value={empStatusFilter}
                   onChange={(e) => setEmpStatusFilter(e.target.value)}
-                  className="bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                  className="bg-slate-950 border border-slate-700/80 rounded-md px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
                 >
                   <option value="ALL">All Status</option>
                   <option value="ACTIVE">Active</option>
@@ -438,7 +459,7 @@ export const HrdDashboard: React.FC = () => {
                     setFormError(null);
                     setIsCreateOpen(true);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-bold shadow-lg shadow-blue-600/30 transition cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   Add Employee
@@ -447,7 +468,7 @@ export const HrdDashboard: React.FC = () => {
             </div>
 
             {/* Employee Table */}
-            <div className="overflow-x-auto rounded-xl border border-slate-800">
+            <div className="overflow-x-auto rounded-md border border-slate-800">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-slate-950 text-slate-400 font-semibold border-b border-slate-800">
                   <tr>
@@ -507,7 +528,7 @@ export const HrdDashboard: React.FC = () => {
                         </td>
                         <td className="py-3 px-4">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${emp.status === 'ACTIVE'
+                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${emp.status === 'ACTIVE'
                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                 : 'bg-red-500/20 text-red-400 border border-red-500/30'
                               }`}
@@ -582,7 +603,7 @@ export const HrdDashboard: React.FC = () => {
 
         {/* TAB 2: ATTENDANCE MONITORING */}
         {activeTab === 'attendances' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6  space-y-4">
             {/* Header & Filter Bar */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-800">
               <div>
@@ -597,7 +618,7 @@ export const HrdDashboard: React.FC = () => {
 
               {/* Filters */}
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5">
+                <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-md px-2.5 py-1.5">
                   <span className="text-slate-400">From:</span>
                   <input
                     type="date"
@@ -607,7 +628,7 @@ export const HrdDashboard: React.FC = () => {
                   />
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5">
+                <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-md px-2.5 py-1.5">
                   <span className="text-slate-400">To:</span>
                   <input
                     type="date"
@@ -622,13 +643,13 @@ export const HrdDashboard: React.FC = () => {
                   placeholder="Filter by Emp ID..."
                   value={attEmployeeId}
                   onChange={(e) => setAttEmployeeId(e.target.value)}
-                  className="bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none w-32"
+                  className="bg-slate-950 border border-slate-700/80 rounded-md px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none w-32"
                 />
 
                 <select
                   value={attStatusFilter}
                   onChange={(e) => setAttStatusFilter(e.target.value)}
-                  className="bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                  className="bg-slate-950 border border-slate-700/80 rounded-md px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
                 >
                   <option value="ALL">All Statuses</option>
                   <option value="PRESENT">Present</option>
@@ -643,7 +664,7 @@ export const HrdDashboard: React.FC = () => {
                       setAttStatusFilter('ALL');
                       setAttEmployeeId('');
                     }}
-                    className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition"
+                    className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md text-xs transition"
                   >
                     Reset
                   </button>
@@ -652,7 +673,7 @@ export const HrdDashboard: React.FC = () => {
             </div>
 
             {/* Attendance Table */}
-            <div className="overflow-x-auto rounded-xl border border-slate-800">
+            <div className="overflow-x-auto rounded-md border border-slate-800">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-slate-950 text-slate-400 font-semibold border-b border-slate-800">
                   <tr>
@@ -709,7 +730,7 @@ export const HrdDashboard: React.FC = () => {
                         </td>
                         <td className="py-3 px-4">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${att.status === 'PRESENT'
+                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${att.status === 'PRESENT'
                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                 : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                               }`}
@@ -829,8 +850,8 @@ export const HrdDashboard: React.FC = () => {
 
       {/* MODAL 1: CREATE EMPLOYEE */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-md  overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
               <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
                 <Plus className="w-4 h-4 text-blue-400" />
@@ -846,7 +867,7 @@ export const HrdDashboard: React.FC = () => {
 
             <form onSubmit={handleCreateEmployee} className="p-6 space-y-4">
               {formError && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-300 text-xs flex items-start gap-2">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-md p-3 text-red-300 text-xs flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
                   <span>{formError}</span>
                 </div>
@@ -865,7 +886,7 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, employee_number: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -881,7 +902,7 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, name: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -898,7 +919,7 @@ export const HrdDashboard: React.FC = () => {
                   onChange={(e) =>
                     setCreateForm({ ...createForm, email: e.target.value })
                   }
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                 />
                 <span className="text-[10px] text-slate-500">
                   Username will be automatically created as: {createForm.email ? createForm.email.split('@')[0] : '...'}
@@ -915,7 +936,7 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, phone: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -928,7 +949,7 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, department: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -941,7 +962,7 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, position: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -957,7 +978,7 @@ export const HrdDashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-bold shadow-lg shadow-blue-600/30 transition disabled:opacity-50"
                 >
                   {formSubmitting ? (
                     <>
@@ -976,10 +997,10 @@ export const HrdDashboard: React.FC = () => {
 
       {/* MODAL 2: AUTO-GENERATED CREDENTIALS REVEAL */}
       {newCredentials && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-emerald-500/40 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85  animate-fadeIn">
+          <div className="bg-slate-900 border border-emerald-500/40 w-full max-w-md rounded-md  p-6 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-md bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                 <CheckCircle className="w-6 h-6" />
               </div>
               <div>
@@ -992,7 +1013,7 @@ export const HrdDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+            <div className="bg-slate-950 border border-slate-800 rounded-md p-4 space-y-3">
               <div>
                 <span className="text-[11px] text-slate-400 block uppercase font-mono">
                   Username
@@ -1018,7 +1039,7 @@ export const HrdDashboard: React.FC = () => {
                     `Staff Portal Credentials:\nUsername: ${newCredentials.username}\nPassword: ${newCredentials.temporaryPassword}`
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-md border border-slate-700 transition"
               >
                 {copied ? (
                   <>
@@ -1035,7 +1056,7 @@ export const HrdDashboard: React.FC = () => {
 
               <button
                 onClick={() => setNewCredentials(null)}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-blue-600/30"
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-md transition shadow-lg shadow-blue-600/30"
               >
                 Done
               </button>
@@ -1046,8 +1067,8 @@ export const HrdDashboard: React.FC = () => {
 
       {/* MODAL 3: EDIT EMPLOYEE */}
       {isEditOpen && selectedEmployee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-md  overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
               <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
                 <Edit2 className="w-4 h-4 text-blue-400" />
@@ -1063,7 +1084,7 @@ export const HrdDashboard: React.FC = () => {
 
             <form onSubmit={handleUpdateEmployee} className="p-6 space-y-4">
               {formError && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-300 text-xs flex items-start gap-2">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-md p-3 text-red-300 text-xs flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
                   <span>{formError}</span>
                 </div>
@@ -1078,7 +1099,7 @@ export const HrdDashboard: React.FC = () => {
                   required
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
@@ -1091,7 +1112,7 @@ export const HrdDashboard: React.FC = () => {
                   required
                   value={editForm.email}
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
@@ -1102,7 +1123,7 @@ export const HrdDashboard: React.FC = () => {
                     type="text"
                     value={editForm.phone}
                     onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -1114,7 +1135,7 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setEditForm({ ...editForm, department: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -1126,7 +1147,7 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setEditForm({ ...editForm, position: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -1142,7 +1163,7 @@ export const HrdDashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-bold shadow-lg shadow-blue-600/30 transition disabled:opacity-50"
                 >
                   {formSubmitting ? (
                     <>
@@ -1161,8 +1182,8 @@ export const HrdDashboard: React.FC = () => {
 
       {/* MODAL 4: ATTENDANCE DETAIL VIEW */}
       {detailAttendance && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-md  overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
               <div>
                 <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
@@ -1183,7 +1204,7 @@ export const HrdDashboard: React.FC = () => {
 
             <div className="p-6 overflow-y-auto space-y-6">
               {/* Employee Summary Card */}
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 flex items-center justify-between">
                 <div>
                   <h4 className="text-sm font-bold text-slate-100">
                     {detailAttendance.employee?.name || `Employee #${detailAttendance.employee_id}`}
@@ -1194,7 +1215,7 @@ export const HrdDashboard: React.FC = () => {
                   </p>
                 </div>
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold ${detailAttendance.status === 'PRESENT'
+                  className={`px-3 py-1 rounded-md text-xs font-bold ${detailAttendance.status === 'PRESENT'
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                       : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                     }`}
@@ -1210,7 +1231,7 @@ export const HrdDashboard: React.FC = () => {
                   <span className="text-xs font-semibold text-slate-300 block">
                     Check-In Photo (at {formatTime(detailAttendance.check_in_at)})
                   </span>
-                  <div className="aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                  <div className="aspect-[4/3] bg-slate-950 rounded-md overflow-hidden border border-slate-800 flex items-center justify-center">
                     {detailAttendance.check_in_photo ? (
                       <img
                         src={getPhotoUrl(detailAttendance.check_in_photo)}
@@ -1229,7 +1250,7 @@ export const HrdDashboard: React.FC = () => {
                   <span className="text-xs font-semibold text-slate-300 block">
                     Check-Out Photo (at {formatTime(detailAttendance.check_out_at)})
                   </span>
-                  <div className="aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                  <div className="aspect-[4/3] bg-slate-950 rounded-md overflow-hidden border border-slate-800 flex items-center justify-center">
                     {detailAttendance.check_out_photo ? (
                       <img
                         src={getPhotoUrl(detailAttendance.check_out_photo)}
@@ -1246,7 +1267,7 @@ export const HrdDashboard: React.FC = () => {
 
               {/* Coordinates & Notes */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                <div className="bg-slate-950 p-3 rounded-md border border-slate-800 space-y-1">
                   <span className="text-slate-400 font-medium block">GPS Location</span>
                   <a
                     href={`https://maps.google.com/?q=${detailAttendance.check_in_latitude},${detailAttendance.check_in_longitude}`}
@@ -1260,7 +1281,7 @@ export const HrdDashboard: React.FC = () => {
                   </a>
                 </div>
 
-                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                <div className="bg-slate-950 p-3 rounded-md border border-slate-800 space-y-1">
                   <span className="text-slate-400 font-medium block">Staff Notes</span>
                   <p className="text-slate-200 italic">
                     {detailAttendance.notes ? `"${detailAttendance.notes}"` : 'No notes submitted'}
@@ -1272,7 +1293,7 @@ export const HrdDashboard: React.FC = () => {
             <div className="px-6 py-3.5 border-t border-slate-800 bg-slate-900/80 text-right">
               <button
                 onClick={() => setDetailAttendance(null)}
-                className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition"
+                className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-md transition"
               >
                 Close
               </button>
@@ -1287,6 +1308,127 @@ export const HrdDashboard: React.FC = () => {
         onClose={() => setSelectedPhoto(null)}
         photoPath={selectedPhoto}
       />
+
+      {/* CHANGE PASSWORD MODAL */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-md  p-6 relative">
+            <h3 className="text-base font-bold text-slate-100 mb-2 flex items-center gap-2">
+              <Key className="w-4 h-4 text-blue-400" />
+              Change Password
+            </h3>
+            
+            {passwordError && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-xs text-red-300 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                <span>{passwordError}</span>
+              </div>
+            )}
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setPasswordLoading(true);
+              setPasswordError(null);
+              
+              if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+                setPasswordError('New passwords do not match');
+                setPasswordLoading(false);
+                return;
+              }
+
+              if (passwordForm.newPassword.length < 6) {
+                setPasswordError('New password must be at least 6 characters');
+                setPasswordLoading(false);
+                return;
+              }
+
+              try {
+                await apiClient.post('/employees/change-password', {
+                  oldPassword: passwordForm.oldPassword,
+                  newPassword: passwordForm.newPassword,
+                });
+                setNotification({ type: 'success', message: 'Password updated successfully!' });
+                setIsPasswordModalOpen(false);
+                setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+              } catch (err: any) {
+                setPasswordError(err.response?.data?.message || 'Failed to change password');
+              } finally {
+                setPasswordLoading(false);
+              }
+            }}>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.oldPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPasswordModalOpen(false);
+                    setPasswordError(null);
+                  }}
+                  disabled={passwordLoading}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md text-xs font-semibold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white rounded-md text-xs font-semibold transition"
+                >
+                  {passwordLoading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Password'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

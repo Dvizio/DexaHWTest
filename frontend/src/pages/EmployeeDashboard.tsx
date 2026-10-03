@@ -193,7 +193,7 @@ export const EmployeeDashboard: React.FC = () => {
         {/* Global Notification Banner */}
         {actionAlert && (
           <div
-            className={`p-4 rounded-xl flex items-center justify-between border ${
+            className={`p-4 rounded-md flex items-center justify-between border ${
               actionAlert.type === 'success'
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                 : 'bg-red-500/10 border-red-500/30 text-red-300'
@@ -219,13 +219,13 @@ export const EmployeeDashboard: React.FC = () => {
         {/* Top Section: Profile Card & Today's Attendance Status */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Card */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6  relative overflow-hidden flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Employee Profile
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                   {profile?.status || 'ACTIVE'}
                 </span>
               </div>
@@ -281,7 +281,7 @@ export const EmployeeDashboard: React.FC = () => {
           </div>
 
           {/* Today's Attendance Status Card (2 Columns Span on LG) */}
-          <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800/80 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between relative">
+          <div className="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-md p-6  flex flex-col justify-between relative">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -323,9 +323,9 @@ export const EmployeeDashboard: React.FC = () => {
                 </div>
               ) : !todayAttendance ? (
                 /* STATE 1: NOT CHECKED IN */
-                <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-5 my-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="bg-slate-950/60 border border-slate-800/80 rounded-md p-5 my-2 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">
+                    <div className="w-12 h-12 rounded-md bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">
                       <Clock className="w-6 h-6" />
                     </div>
                     <div>
@@ -340,7 +340,7 @@ export const EmployeeDashboard: React.FC = () => {
 
                   <button
                     onClick={() => handleOpenAttendanceModal('check-in')}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition duration-200 cursor-pointer flex-shrink-0"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-md shadow-lg shadow-emerald-600/30 transition duration-200 cursor-pointer flex-shrink-0"
                   >
                     <LogIn className="w-4 h-4" />
                     Check In Now
@@ -348,10 +348,10 @@ export const EmployeeDashboard: React.FC = () => {
                 </div>
               ) : !todayAttendance.check_out_at ? (
                 /* STATE 2: CHECKED IN, PENDING CHECK OUT */
-                <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-5 my-2 space-y-4">
+                <div className="bg-slate-950/60 border border-slate-800/80 rounded-md p-5 my-2 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                      <div className="w-12 h-12 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
                         <CheckCircle className="w-6 h-6" />
                       </div>
                       <div>
@@ -360,7 +360,7 @@ export const EmployeeDashboard: React.FC = () => {
                             Checked In at {formatTime(todayAttendance.check_in_at)}
                           </h4>
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                               todayAttendance.status === 'PRESENT'
                                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                                 : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
@@ -377,7 +377,7 @@ export const EmployeeDashboard: React.FC = () => {
 
                     <button
                       onClick={() => handleOpenAttendanceModal('check-out')}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-600/30 transition duration-200 cursor-pointer flex-shrink-0"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-md shadow-lg shadow-blue-600/30 transition duration-200 cursor-pointer flex-shrink-0"
                     >
                       <LogOut className="w-4 h-4" />
                       Check Out
@@ -412,10 +412,10 @@ export const EmployeeDashboard: React.FC = () => {
                 </div>
               ) : (
                 /* STATE 3: COMPLETED FOR TODAY */
-                <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-5 my-2 space-y-3">
+                <div className="bg-slate-950/60 border border-slate-800/80 rounded-md p-5 my-2 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                      <div className="w-10 h-10 rounded-md bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                         <Sparkles className="w-5 h-5" />
                       </div>
                       <div>
@@ -428,7 +428,7 @@ export const EmployeeDashboard: React.FC = () => {
                       </div>
                     </div>
                     <span
-                      className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                      className={`text-xs font-bold px-2.5 py-1 rounded-md ${
                         todayAttendance.status === 'PRESENT'
                           ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                           : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
@@ -486,7 +486,7 @@ export const EmployeeDashboard: React.FC = () => {
         </div>
 
         {/* Attendance History Section */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6  space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
             <div>
               <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
@@ -500,7 +500,7 @@ export const EmployeeDashboard: React.FC = () => {
 
             {/* Filter Bar */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5">
+              <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-md px-2.5 py-1.5">
                 <span className="text-slate-400">From:</span>
                 <input
                   type="date"
@@ -510,7 +510,7 @@ export const EmployeeDashboard: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5">
+              <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-md px-2.5 py-1.5">
                 <span className="text-slate-400">To:</span>
                 <input
                   type="date"
@@ -523,7 +523,7 @@ export const EmployeeDashboard: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-1.5 text-slate-200 focus:outline-none text-xs"
+                className="bg-slate-950 border border-slate-700/80 rounded-md px-3 py-1.5 text-slate-200 focus:outline-none text-xs"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="PRESENT">Present (On Time)</option>
@@ -537,7 +537,7 @@ export const EmployeeDashboard: React.FC = () => {
                     setEndDate('');
                     setStatusFilter('ALL');
                   }}
-                  className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition"
+                  className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md text-xs transition"
                 >
                   Clear Filters
                 </button>
@@ -546,7 +546,7 @@ export const EmployeeDashboard: React.FC = () => {
           </div>
 
           {/* Table Container */}
-          <div className="overflow-x-auto rounded-xl border border-slate-800">
+          <div className="overflow-x-auto rounded-md border border-slate-800">
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-slate-950 text-slate-400 font-semibold border-b border-slate-800">
                 <tr>
@@ -592,7 +592,7 @@ export const EmployeeDashboard: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
                             record.status === 'PRESENT'
                               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                               : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
@@ -695,8 +695,8 @@ export const EmployeeDashboard: React.FC = () => {
 
       {/* Change Password Modal */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl shadow-2xl p-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-md  p-6 relative">
             <h3 className="text-base font-bold text-slate-100 mb-2">Change Password</h3>
             
             {passwordError && (
@@ -746,7 +746,7 @@ export const EmployeeDashboard: React.FC = () => {
                     required
                     value={passwordForm.oldPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -759,7 +759,7 @@ export const EmployeeDashboard: React.FC = () => {
                     required
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -772,7 +772,7 @@ export const EmployeeDashboard: React.FC = () => {
                     required
                     value={passwordForm.confirmPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -782,14 +782,14 @@ export const EmployeeDashboard: React.FC = () => {
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}
                   disabled={passwordLoading}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={passwordLoading}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white rounded-md text-xs font-semibold"
                 >
                   {passwordLoading ? 'Updating...' : 'Update Password'}
                 </button>
@@ -801,3 +801,4 @@ export const EmployeeDashboard: React.FC = () => {
     </div>
   );
 };
+
