@@ -1,12 +1,11 @@
-import { IsOptional, IsDateString, IsEnum, IsInt, Min } from 'class-validator';
+import { IsOptional, IsDateString, IsEnum, IsInt, Min, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { AttendanceStatus } from '../attendance.entity.js';
 
 export class AttendanceFilterDto {
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
-  @IsInt()
-  employeeId?: number;
+  @IsString()
+  employeeName?: string;
 
   @IsOptional()
   @IsDateString()

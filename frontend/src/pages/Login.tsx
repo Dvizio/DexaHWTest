@@ -60,38 +60,38 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white text-black font-mono flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-md bg-blue-600 mb-4">
-            <Clock className="w-6 h-6 text-white" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-md bg-black text-white mb-4">
+            <Clock className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
+          <h1 className="text-2xl font-bold text-black tracking-tight">
             Staff Attendance
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-gray-600 mt-1">
             Work-From-Home & Remote Staff Attendance Portal
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-md p-6 sm:p-8">
+        <div className="bg-gray-50 border border-gray-300 rounded-md p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-md p-3 flex items-start gap-2.5 text-red-300 text-xs">
-                <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+              <div className="bg-gray-200 border border-black rounded-md p-3 flex items-start gap-2.5 text-black text-xs">
+                <AlertCircle className="w-4 h-4" />
                 <span>{error}</span>
               </div>
             )}
 
             {/* Username Field */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <label className="text-xs font-semibold text-black uppercase tracking-wider">
                 Username
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                   <User className="w-4 h-4" />
                 </div>
                 <input
@@ -101,18 +101,18 @@ export const Login: React.FC = () => {
                   placeholder="Username"
                   disabled={loading}
                   autoComplete="username"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-md pl-9 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+                  className="w-full bg-white border border-gray-300 rounded-md pl-9 pr-3 py-2 text-xs text-black placeholder-gray-400 focus:outline-none focus:border-black transition"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <label className="text-xs font-semibold text-black uppercase tracking-wider">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -122,12 +122,12 @@ export const Login: React.FC = () => {
                   placeholder="••••••••"
                   disabled={loading}
                   autoComplete="current-password"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-md pl-9 pr-10 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+                  className="w-full bg-white border border-gray-300 rounded-md pl-9 pr-10 py-2 text-xs text-black placeholder-gray-400 focus:outline-none focus:border-black transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 transition"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-black transition"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -142,7 +142,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-md transition flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
+              className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -156,23 +156,23 @@ export const Login: React.FC = () => {
           </form>
 
           {/* Quick Fill Demo Helper */}
-          <div className="mt-5 pt-4 border-t border-slate-800 text-center">
-            <p className="text-[11px] text-slate-400 mb-2 flex items-center justify-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-400" />
+          <div className="mt-5 pt-4 border-t border-gray-300 text-center">
+            <p className="text-[11px] text-gray-600 mb-2 flex items-center justify-center gap-1">
+              <Sparkles className="w-3 h-3" />
               Default Seed Account:
             </p>
             <button
               type="button"
               onClick={() => handleQuickFill('admin', 'Admin123!')}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-md border border-slate-700 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-gray-100 text-black text-xs rounded-md border border-gray-300 transition"
             >
-              Fill Admin (<span className="text-blue-400 font-mono">admin / Admin123!</span>)
+              Fill Admin (admin / Admin123!)
             </button>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-slate-400 mt-6">
+        <p className="text-center text-xs text-gray-500 mt-6">
           Staff Attendance System &bull; Secure JWT Authentication
         </p>
       </div>

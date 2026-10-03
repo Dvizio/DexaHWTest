@@ -79,7 +79,7 @@ export const HrdDashboard: React.FC = () => {
   const [attStartDate, setAttStartDate] = useState<string>('');
   const [attEndDate, setAttEndDate] = useState<string>('');
   const [attStatusFilter, setAttStatusFilter] = useState<string>('ALL');
-  const [attEmployeeId, setAttEmployeeId] = useState<string>('');
+  const [attEmployeeName, setAttEmployeeName] = useState<string>('');
   const [attPagination, setAttPagination] = useState({
     page: 1,
     limit: 10,
@@ -152,7 +152,7 @@ export const HrdDashboard: React.FC = () => {
         if (attStartDate) params.startDate = attStartDate;
         if (attEndDate) params.endDate = attEndDate;
         if (attStatusFilter && attStatusFilter !== 'ALL') params.status = attStatusFilter;
-        if (attEmployeeId.trim()) params.employeeId = parseInt(attEmployeeId.trim(), 10);
+        if (attEmployeeName.trim()) params.employeeName = attEmployeeName.trim();
 
         const res = await apiClient.get<PaginatedResponse<Attendance>>('/attendances', {
           params,
@@ -173,7 +173,7 @@ export const HrdDashboard: React.FC = () => {
         setLoadingAttendances(false);
       }
     },
-    [attStartDate, attEndDate, attStatusFilter, attEmployeeId, attPagination.limit, attPagination.page]
+    [attStartDate, attEndDate, attStatusFilter, attEmployeeName, attPagination.limit, attPagination.page]
   );
 
   useEffect(() => {
@@ -182,7 +182,7 @@ export const HrdDashboard: React.FC = () => {
     } else {
       fetchAttendances(1);
     }
-  }, [activeTab, empSearch, empStatusFilter, attStartDate, attEndDate, attStatusFilter, attEmployeeId]);
+  }, [activeTab, empSearch, empStatusFilter, attStartDate, attEndDate, attStatusFilter, attEmployeeName]);
 
   // Handle Create Employee
   const handleCreateEmployee = async (e: React.FormEvent) => {
@@ -346,7 +346,7 @@ export const HrdDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col pb-12">
+    <div className="min-h-screen bg-white text-black flex flex-col pb-12">
       <Navbar title="HRD Portal" subtitle="Staff Management & Attendance Monitoring" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full space-y-6">
@@ -354,15 +354,15 @@ export const HrdDashboard: React.FC = () => {
         {notification && (
           <div
             className={`p-4 rounded-md flex items-center justify-between border ${notification.type === 'success'
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                : 'bg-red-500/10 border-red-500/30 text-red-300'
+              ? 'bg-gray-50 border-gray-200 text-black'
+              : 'bg-gray-50 border-gray-200 text-black'
               }`}
           >
             <div className="flex items-center gap-2.5 text-sm font-medium">
               {notification.type === 'success' ? (
-                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                <CheckCircle className="w-5 h-5 text-black" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-red-400" />
+                <AlertCircle className="w-5 h-5 text-black" />
               )}
               <span>{notification.message}</span>
             </div>
@@ -376,13 +376,13 @@ export const HrdDashboard: React.FC = () => {
         )}
 
         {/* Top Navigation Tabs */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-3">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('employees')}
               className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'employees'
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
+                ? 'bg-gray-300 text-black  '
+                : 'bg-gray-50 text-gray-500 hover:text-black hover:bg-gray-300/40 border border-gray-200'
                 }`}
             >
               <Users className="w-4 h-4" />
@@ -392,8 +392,8 @@ export const HrdDashboard: React.FC = () => {
             <button
               onClick={() => setActiveTab('attendances')}
               className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'attendances'
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
+                ? 'bg-gray-300 text-black  '
+                : 'bg-gray-50 text-gray-500 hover:text-black hover:bg-gray-300/40 border border-gray-200'
                 }`}
             >
               <ClipboardList className="w-4 h-4" />
@@ -407,24 +407,24 @@ export const HrdDashboard: React.FC = () => {
               setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
               setIsPasswordModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-bold bg-gray-50 text-black hover: hover:bg-gray-300/40 border border-gray-200 transition cursor-pointer"
           >
-            <Key className="w-4 h-4 text-blue-400" />
+            <Key className="w-4 h-4 text-black" />
             Change Password
           </button>
         </div>
 
         {/* TAB 1: EMPLOYEE MANAGEMENT */}
         {activeTab === 'employees' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6  space-y-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-md p-6  space-y-4">
             {/* Header & Filter Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-200">
               <div>
-                <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-blue-400" />
+                <h3 className="text-base font-bold text-black flex items-center gap-2">
+                  <Users className="w-4 h-4 text-black" />
                   Employees Directory
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-gray-500">
                   Manage registered company employees and their account access
                 </p>
               </div>
@@ -432,13 +432,13 @@ export const HrdDashboard: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3">
                 {/* Search Bar */}
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                   <input
                     type="text"
                     placeholder="Search by name..."
                     value={empSearch}
                     onChange={(e) => setEmpSearch(e.target.value)}
-                    className="bg-slate-950 border border-slate-700/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 w-44 sm:w-56 transition"
+                    className="bg-white border border-gray-200 rounded-md pl-9 pr-3 py-1.5 text-xs text-black placeholder-gray-400 focus:outline-none focus:border-black w-44 sm:w-56 transition"
                   />
                 </div>
 
@@ -446,7 +446,7 @@ export const HrdDashboard: React.FC = () => {
                 <select
                   value={empStatusFilter}
                   onChange={(e) => setEmpStatusFilter(e.target.value)}
-                  className="bg-slate-950 border border-slate-700/80 rounded-md px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                  className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-xs text-black focus:outline-none"
                 >
                   <option value="ALL">All Status</option>
                   <option value="ACTIVE">Active</option>
@@ -459,7 +459,7 @@ export const HrdDashboard: React.FC = () => {
                     setFormError(null);
                     setIsCreateOpen(true);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-bold shadow-lg shadow-blue-600/30 transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-300 hover:bg-[#C5B5A9] text-black  rounded-md text-xs font-bold  transition cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   Add Employee
@@ -468,9 +468,9 @@ export const HrdDashboard: React.FC = () => {
             </div>
 
             {/* Employee Table */}
-            <div className="overflow-x-auto rounded-md border border-slate-800">
+            <div className="overflow-x-auto rounded-md border border-gray-200">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-950 text-slate-400 font-semibold border-b border-slate-800">
+                <thead className="bg-white text-gray-500 font-semibold border-b border-gray-200">
                   <tr>
                     <th className="py-3 px-4">Emp No</th>
                     <th className="py-3 px-4">Name</th>
@@ -480,19 +480,19 @@ export const HrdDashboard: React.FC = () => {
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-gray-200">
                   {loadingEmployees ? (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-slate-400">
+                      <td colSpan={6} className="py-8 text-center text-gray-500">
                         <div className="inline-flex items-center gap-2">
-                          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                          <Loader2 className="w-4 h-4 animate-spin text-black" />
                           <span>Loading employees...</span>
                         </div>
                       </td>
                     </tr>
                   ) : employees.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-slate-400">
+                      <td colSpan={6} className="py-8 text-center text-gray-500">
                         No employees found matching the filters.
                       </td>
                     </tr>
@@ -500,28 +500,28 @@ export const HrdDashboard: React.FC = () => {
                     employees.map((emp) => (
                       <tr
                         key={emp.id}
-                        className="hover:bg-slate-800/40 transition-colors"
+                        className="hover:bg-gray-300/40/40 transition-colors"
                       >
-                        <td className="py-3 px-4 font-mono font-medium text-blue-400">
+                        <td className="py-3 px-4 font-mono font-medium text-black">
                           {emp.employee_number}
                         </td>
-                        <td className="py-3 px-4 font-semibold text-slate-100">
+                        <td className="py-3 px-4 font-semibold text-black">
                           {emp.name}
                         </td>
-                        <td className="py-3 px-4 text-slate-300">
+                        <td className="py-3 px-4 text-black">
                           <div>{emp.department || '-'}</div>
-                          <div className="text-[11px] text-slate-400">
+                          <div className="text-[11px] text-gray-500">
                             {emp.position || '-'}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-slate-300 space-y-0.5">
+                        <td className="py-3 px-4 text-black space-y-0.5">
                           <div className="flex items-center gap-1">
-                            <Mail className="w-3 h-3 text-slate-500" />
+                            <Mail className="w-3 h-3 text-gray-500" />
                             <span>{emp.email}</span>
                           </div>
                           {emp.phone && (
-                            <div className="flex items-center gap-1 text-slate-400 text-[11px]">
-                              <Phone className="w-3 h-3 text-slate-500" />
+                            <div className="flex items-center gap-1 text-gray-500 text-[11px]">
+                              <Phone className="w-3 h-3 text-gray-500" />
                               <span>{emp.phone}</span>
                             </div>
                           )}
@@ -529,8 +529,8 @@ export const HrdDashboard: React.FC = () => {
                         <td className="py-3 px-4">
                           <span
                             className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${emp.status === 'ACTIVE'
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                              ? 'bg-gray-50 text-black border border-gray-200'
+                              : 'bg-gray-50 text-black border border-gray-200'
                               }`}
                           >
                             {emp.status}
@@ -541,7 +541,7 @@ export const HrdDashboard: React.FC = () => {
                             <button
                               onClick={() => handleOpenEdit(emp)}
                               title="Edit Employee"
-                              className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition"
+                              className="p-1.5 text-gray-500 hover:text-black hover:bg-gray-300/40 rounded-md transition"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
@@ -553,9 +553,9 @@ export const HrdDashboard: React.FC = () => {
                                   ? 'Deactivate Account'
                                   : 'Activate Account'
                               }
-                              className={`p-1.5 rounded-lg transition ${emp.status === 'ACTIVE'
-                                  ? 'text-slate-400 hover:text-red-400 hover:bg-red-500/10'
-                                  : 'text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10'
+                              className={`p-1.5 rounded-md transition ${emp.status === 'ACTIVE'
+                                ? 'text-gray-500 hover:text-black hover:bg-gray-50'
+                                : 'text-gray-500 hover:text-black hover:bg-gray-50'
                                 }`}
                             >
                               <Power className="w-3.5 h-3.5" />
@@ -571,10 +571,10 @@ export const HrdDashboard: React.FC = () => {
 
             {/* Pagination Controls */}
             {empPagination.totalPages > 1 && (
-              <div className="flex items-center justify-between pt-3 text-xs text-slate-400">
+              <div className="flex items-center justify-between pt-3 text-xs text-gray-500">
                 <span>
-                  Showing page <strong className="text-slate-200">{empPagination.page}</strong> of{' '}
-                  <strong className="text-slate-200">{empPagination.totalPages}</strong> (
+                  Showing page <strong className="text-black">{empPagination.page}</strong> of{' '}
+                  <strong className="text-black">{empPagination.totalPages}</strong> (
                   {empPagination.total} employees)
                 </span>
 
@@ -582,7 +582,7 @@ export const HrdDashboard: React.FC = () => {
                   <button
                     onClick={() => fetchEmployees(empPagination.page - 1)}
                     disabled={empPagination.page <= 1 || loadingEmployees}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 transition"
+                    className="p-1.5 rounded-md bg-gray-300/40 hover:bg-[#C5B5A9] disabled:opacity-40 disabled:cursor-not-allowed text-black transition"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -591,7 +591,7 @@ export const HrdDashboard: React.FC = () => {
                     disabled={
                       empPagination.page >= empPagination.totalPages || loadingEmployees
                     }
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 transition"
+                    className="p-1.5 rounded-md bg-gray-300/40 hover:bg-[#C5B5A9] disabled:opacity-40 disabled:cursor-not-allowed text-black transition"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -603,68 +603,68 @@ export const HrdDashboard: React.FC = () => {
 
         {/* TAB 2: ATTENDANCE MONITORING */}
         {activeTab === 'attendances' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-md p-6  space-y-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-md p-6  space-y-4">
             {/* Header & Filter Bar */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-gray-200">
               <div>
-                <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                  <ClipboardList className="w-4 h-4 text-blue-400" />
+                <h3 className="text-base font-bold text-black flex items-center gap-2">
+                  <ClipboardList className="w-4 h-4 text-black" />
                   Company Attendance Logs
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-gray-500">
                   Inspect daily remote staff check-ins, lateness statuses, and selfie verifications
                 </p>
               </div>
 
               {/* Filters */}
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-md px-2.5 py-1.5">
-                  <span className="text-slate-400">From:</span>
+                <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-md px-2.5 py-1.5">
+                  <span className="text-gray-500">From:</span>
                   <input
                     type="date"
                     value={attStartDate}
                     onChange={(e) => setAttStartDate(e.target.value)}
-                    className="bg-transparent text-slate-200 focus:outline-none text-xs"
+                    className="bg-transparent text-black focus:outline-none text-xs"
                   />
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-md px-2.5 py-1.5">
-                  <span className="text-slate-400">To:</span>
+                <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-md px-2.5 py-1.5">
+                  <span className="text-gray-500">To:</span>
                   <input
                     type="date"
                     value={attEndDate}
                     onChange={(e) => setAttEndDate(e.target.value)}
-                    className="bg-transparent text-slate-200 focus:outline-none text-xs"
+                    className="bg-transparent text-black focus:outline-none text-xs"
                   />
                 </div>
 
                 <input
                   type="text"
-                  placeholder="Filter by Emp ID..."
-                  value={attEmployeeId}
-                  onChange={(e) => setAttEmployeeId(e.target.value)}
-                  className="bg-slate-950 border border-slate-700/80 rounded-md px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none w-32"
+                  placeholder="Filter by name..."
+                  value={attEmployeeName}
+                  onChange={(e) => setAttEmployeeName(e.target.value)}
+                  className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-xs text-black placeholder-gray-400 focus:outline-none w-36"
                 />
 
                 <select
                   value={attStatusFilter}
                   onChange={(e) => setAttStatusFilter(e.target.value)}
-                  className="bg-slate-950 border border-slate-700/80 rounded-md px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                  className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-xs text-black focus:outline-none"
                 >
                   <option value="ALL">All Statuses</option>
                   <option value="PRESENT">Present</option>
                   <option value="LATE">Late</option>
                 </select>
 
-                {(attStartDate || attEndDate || attStatusFilter !== 'ALL' || attEmployeeId) && (
+                {(attStartDate || attEndDate || attStatusFilter !== 'ALL' || attEmployeeName) && (
                   <button
                     onClick={() => {
                       setAttStartDate('');
                       setAttEndDate('');
                       setAttStatusFilter('ALL');
-                      setAttEmployeeId('');
+                      setAttEmployeeName('');
                     }}
-                    className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md text-xs transition"
+                    className="px-2.5 py-1.5 bg-gray-200 hover:bg-gray-300 text-black rounded-md text-xs transition"
                   >
                     Reset
                   </button>
@@ -673,9 +673,9 @@ export const HrdDashboard: React.FC = () => {
             </div>
 
             {/* Attendance Table */}
-            <div className="overflow-x-auto rounded-md border border-slate-800">
+            <div className="overflow-x-auto rounded-md border border-gray-200">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-950 text-slate-400 font-semibold border-b border-slate-800">
+                <thead className="bg-white text-gray-500 font-semibold border-b border-gray-200">
                   <tr>
                     <th className="py-3 px-4">Date</th>
                     <th className="py-3 px-4">Employee</th>
@@ -689,19 +689,19 @@ export const HrdDashboard: React.FC = () => {
                     <th className="py-3 px-4 text-right">Detail</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-gray-200">
                   {loadingAttendances ? (
                     <tr>
-                      <td colSpan={10} className="py-8 text-center text-slate-400">
+                      <td colSpan={10} className="py-8 text-center text-gray-500">
                         <div className="inline-flex items-center gap-2">
-                          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                          <Loader2 className="w-4 h-4 animate-spin text-black" />
                           <span>Loading company attendance logs...</span>
                         </div>
                       </td>
                     </tr>
                   ) : attendances.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="py-8 text-center text-slate-400">
+                      <td colSpan={10} className="py-8 text-center text-gray-500">
                         No attendance records found matching filters.
                       </td>
                     </tr>
@@ -709,41 +709,41 @@ export const HrdDashboard: React.FC = () => {
                     attendances.map((att) => (
                       <tr
                         key={att.id}
-                        className="hover:bg-slate-800/40 transition-colors"
+                        className="hover:bg-gray-300/40/40 transition-colors"
                       >
-                        <td className="py-3 px-4 font-medium text-slate-200 whitespace-nowrap">
+                        <td className="py-3 px-4 font-medium text-black whitespace-nowrap">
                           {formatDate(att.attendance_date)}
                         </td>
                         <td className="py-3 px-4">
-                          <div className="font-semibold text-slate-100">
+                          <div className="font-semibold text-black">
                             {att.employee?.name || `Emp #${att.employee_id}`}
                           </div>
-                          <div className="text-[11px] text-blue-400 font-mono">
+                          <div className="text-[11px] text-black font-mono">
                             {att.employee?.employee_number}
                           </div>
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-300">
+                        <td className="py-3 px-4 font-mono text-black">
                           {formatTime(att.check_in_at)}
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-300">
+                        <td className="py-3 px-4 font-mono text-black">
                           {formatTime(att.check_out_at)}
                         </td>
                         <td className="py-3 px-4">
                           <span
                             className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${att.status === 'PRESENT'
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              ? 'bg-gray-50 text-black border border-gray-200'
+                              : 'bg-gray-50 text-black border border-gray-200'
                               }`}
                           >
                             {att.status}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
+                        <td className="py-3 px-4 text-gray-500 whitespace-nowrap">
                           <a
                             href={`https://maps.google.com/?q=${att.check_in_latitude},${att.check_in_longitude}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-400 hover:underline"
+                            className="inline-flex items-center gap-1 text-black hover:underline"
                           >
                             <MapPin className="w-3 h-3" />
                             {typeof att.check_in_latitude === 'number'
@@ -755,13 +755,13 @@ export const HrdDashboard: React.FC = () => {
                               : Number(att.check_in_longitude || 0).toFixed(4)}
                           </a>
                         </td>
-                        <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
+                        <td className="py-3 px-4 text-gray-500 whitespace-nowrap">
                           {att.check_out_latitude && att.check_out_longitude ? (
                             <a
                               href={`https://maps.google.com/?q=${att.check_out_latitude},${att.check_out_longitude}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-indigo-400 hover:underline"
+                              className="inline-flex items-center gap-1 text-black hover:underline"
                             >
                               <MapPin className="w-3 h-3" />
                               {typeof att.check_out_latitude === 'number'
@@ -773,18 +773,18 @@ export const HrdDashboard: React.FC = () => {
                                 : Number(att.check_out_longitude || 0).toFixed(4)}
                             </a>
                           ) : (
-                            <span className="text-slate-500 italic">N/A</span>
+                            <span className="text-gray-500 italic">N/A</span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-slate-300 max-w-xs truncate">
-                          {att.notes || <span className="text-slate-500 italic">None</span>}
+                        <td className="py-3 px-4 text-black max-w-xs truncate">
+                          {att.notes || <span className="text-gray-500 italic">None</span>}
                         </td>
                         <td className="py-3 px-4 text-center">
                           <div className="flex items-center justify-center gap-1.5">
                             {att.check_in_photo && (
                               <button
                                 onClick={() => setSelectedPhoto(att.check_in_photo)}
-                                className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded text-[11px] font-medium border border-slate-700 transition"
+                                className="px-2 py-1 bg-gray-300/40 hover:bg-[#C5B5A9] text-black rounded text-[11px] font-medium border border-gray-200 transition"
                               >
                                 In
                               </button>
@@ -792,7 +792,7 @@ export const HrdDashboard: React.FC = () => {
                             {att.check_out_photo && (
                               <button
                                 onClick={() => setSelectedPhoto(att.check_out_photo || null)}
-                                className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-400 rounded text-[11px] font-medium border border-slate-700 transition"
+                                className="px-2 py-1 bg-gray-300/40 hover:bg-[#C5B5A9] text-black rounded text-[11px] font-medium border border-gray-200 transition"
                               >
                                 Out
                               </button>
@@ -802,7 +802,7 @@ export const HrdDashboard: React.FC = () => {
                         <td className="py-3 px-4 text-right">
                           <button
                             onClick={() => setDetailAttendance(att)}
-                            className="p-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition"
+                            className="p-1.5 text-gray-500 hover:text-black hover:bg-gray-300/40 rounded-md transition"
                             title="View Full Detail"
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -817,10 +817,10 @@ export const HrdDashboard: React.FC = () => {
 
             {/* Pagination Controls */}
             {attPagination.totalPages > 1 && (
-              <div className="flex items-center justify-between pt-3 text-xs text-slate-400">
+              <div className="flex items-center justify-between pt-3 text-xs text-gray-500">
                 <span>
-                  Showing page <strong className="text-slate-200">{attPagination.page}</strong> of{' '}
-                  <strong className="text-slate-200">{attPagination.totalPages}</strong> (
+                  Showing page <strong className="text-black">{attPagination.page}</strong> of{' '}
+                  <strong className="text-black">{attPagination.totalPages}</strong> (
                   {attPagination.total} total records)
                 </span>
 
@@ -828,7 +828,7 @@ export const HrdDashboard: React.FC = () => {
                   <button
                     onClick={() => fetchAttendances(attPagination.page - 1)}
                     disabled={attPagination.page <= 1 || loadingAttendances}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 transition"
+                    className="p-1.5 rounded-md bg-gray-300/40 hover:bg-[#C5B5A9] disabled:opacity-40 disabled:cursor-not-allowed text-black transition"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -837,7 +837,7 @@ export const HrdDashboard: React.FC = () => {
                     disabled={
                       attPagination.page >= attPagination.totalPages || loadingAttendances
                     }
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 transition"
+                    className="p-1.5 rounded-md bg-gray-300/40 hover:bg-[#C5B5A9] disabled:opacity-40 disabled:cursor-not-allowed text-black transition"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -851,15 +851,15 @@ export const HrdDashboard: React.FC = () => {
       {/* MODAL 1: CREATE EMPLOYEE */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-md  overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
-              <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                <Plus className="w-4 h-4 text-blue-400" />
+          <div className="bg-gray-50 border border-gray-200 w-full max-w-lg rounded-md  overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/80">
+              <h3 className="text-base font-bold text-black flex items-center gap-2">
+                <Plus className="w-4 h-4 text-black" />
                 Register New Employee
               </h3>
               <button
                 onClick={() => setIsCreateOpen(false)}
-                className="text-slate-400 hover:text-slate-200 p-1 rounded-lg"
+                className="text-gray-500 hover:text-black p-1 rounded-md"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -867,15 +867,15 @@ export const HrdDashboard: React.FC = () => {
 
             <form onSubmit={handleCreateEmployee} className="p-6 space-y-4">
               {formError && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-md p-3 text-red-300 text-xs flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-black text-xs flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
                   <span>{formError}</span>
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">
+                  <label className="text-xs font-semibold text-black">
                     Employee Number *
                   </label>
                   <input
@@ -886,12 +886,12 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, employee_number: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">
+                  <label className="text-xs font-semibold text-black">
                     Full Name *
                   </label>
                   <input
@@ -902,13 +902,13 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, name: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300">
+                <label className="text-xs font-semibold text-black">
                   Email Address *
                 </label>
                 <input
@@ -919,16 +919,16 @@ export const HrdDashboard: React.FC = () => {
                   onChange={(e) =>
                     setCreateForm({ ...createForm, email: e.target.value })
                   }
-                  className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                 />
-                <span className="text-[10px] text-slate-500">
+                <span className="text-[10px] text-gray-500">
                   Username will be automatically created as: {createForm.email ? createForm.email.split('@')[0] : '...'}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">Phone</label>
+                  <label className="text-xs font-semibold text-black">Phone</label>
                   <input
                     type="text"
                     placeholder="08123456789"
@@ -936,12 +936,12 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, phone: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">Department</label>
+                  <label className="text-xs font-semibold text-black">Department</label>
                   <input
                     type="text"
                     placeholder="Engineering"
@@ -949,12 +949,12 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, department: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">Position</label>
+                  <label className="text-xs font-semibold text-black">Position</label>
                   <input
                     type="text"
                     placeholder="Software Eng"
@@ -962,23 +962,23 @@ export const HrdDashboard: React.FC = () => {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, position: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
+                  className="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-black transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-bold shadow-lg shadow-blue-600/30 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 bg-gray-300 hover:bg-[#C5B5A9] text-black  rounded-md text-xs font-bold  transition disabled:opacity-50"
                 >
                   {formSubmitting ? (
                     <>
@@ -998,35 +998,35 @@ export const HrdDashboard: React.FC = () => {
       {/* MODAL 2: AUTO-GENERATED CREDENTIALS REVEAL */}
       {newCredentials && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85  animate-fadeIn">
-          <div className="bg-slate-900 border border-emerald-500/40 w-full max-w-md rounded-md  p-6 space-y-4">
+          <div className="bg-gray-50 border border-gray-200 w-full max-w-md rounded-md  p-6 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-md bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-md bg-gray-50 text-black flex items-center justify-center">
                 <CheckCircle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-100">
+                <h3 className="text-base font-bold text-black">
                   Employee Account Created!
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-gray-500">
                   Share these login credentials with {newCredentials.name}
                 </p>
               </div>
             </div>
 
-            <div className="bg-slate-950 border border-slate-800 rounded-md p-4 space-y-3">
+            <div className="bg-white border border-gray-200 rounded-md p-4 space-y-3">
               <div>
-                <span className="text-[11px] text-slate-400 block uppercase font-mono">
+                <span className="text-[11px] text-gray-500 block uppercase font-mono">
                   Username
                 </span>
-                <span className="text-sm font-bold text-blue-400 font-mono">
+                <span className="text-sm font-bold text-black font-mono">
                   {newCredentials.username}
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 block uppercase font-mono">
+                <span className="text-[11px] text-gray-500 block uppercase font-mono">
                   Temporary Password
                 </span>
-                <span className="text-sm font-bold text-emerald-400 font-mono">
+                <span className="text-sm font-bold text-black font-mono">
                   {newCredentials.temporaryPassword}
                 </span>
               </div>
@@ -1039,11 +1039,11 @@ export const HrdDashboard: React.FC = () => {
                     `Staff Portal Credentials:\nUsername: ${newCredentials.username}\nPassword: ${newCredentials.temporaryPassword}`
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-md border border-slate-700 transition"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-300/40 hover:bg-[#C5B5A9] text-black text-xs font-semibold rounded-md border border-gray-200 transition"
               >
                 {copied ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <Check className="w-3.5 h-3.5 text-black" />
                     Copied!
                   </>
                 ) : (
@@ -1056,7 +1056,7 @@ export const HrdDashboard: React.FC = () => {
 
               <button
                 onClick={() => setNewCredentials(null)}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-md transition shadow-lg shadow-blue-600/30"
+                className="px-5 py-2 bg-gray-300 hover:bg-[#C5B5A9] text-black  text-xs font-bold rounded-md transition "
               >
                 Done
               </button>
@@ -1068,15 +1068,15 @@ export const HrdDashboard: React.FC = () => {
       {/* MODAL 3: EDIT EMPLOYEE */}
       {isEditOpen && selectedEmployee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-md  overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
-              <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                <Edit2 className="w-4 h-4 text-blue-400" />
+          <div className="bg-gray-50 border border-gray-200 w-full max-w-lg rounded-md  overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/80">
+              <h3 className="text-base font-bold text-black flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-black" />
                 Edit Employee ({selectedEmployee.employee_number})
               </h3>
               <button
                 onClick={() => setIsEditOpen(false)}
-                className="text-slate-400 hover:text-slate-200 p-1 rounded-lg"
+                className="text-gray-500 hover:text-black p-1 rounded-md"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1084,14 +1084,14 @@ export const HrdDashboard: React.FC = () => {
 
             <form onSubmit={handleUpdateEmployee} className="p-6 space-y-4">
               {formError && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-md p-3 text-red-300 text-xs flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-black text-xs flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
                   <span>{formError}</span>
                 </div>
               )}
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300">
+                <label className="text-xs font-semibold text-black">
                   Full Name *
                 </label>
                 <input
@@ -1099,12 +1099,12 @@ export const HrdDashboard: React.FC = () => {
                   required
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300">
+                <label className="text-xs font-semibold text-black">
                   Email Address *
                 </label>
                 <input
@@ -1112,58 +1112,58 @@ export const HrdDashboard: React.FC = () => {
                   required
                   value={editForm.email}
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">Phone</label>
+                  <label className="text-xs font-semibold text-black">Phone</label>
                   <input
                     type="text"
                     value={editForm.phone}
                     onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">Department</label>
+                  <label className="text-xs font-semibold text-black">Department</label>
                   <input
                     type="text"
                     value={editForm.department}
                     onChange={(e) =>
                       setEditForm({ ...editForm, department: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">Position</label>
+                  <label className="text-xs font-semibold text-black">Position</label>
                   <input
                     type="text"
                     value={editForm.position}
                     onChange={(e) =>
                       setEditForm({ ...editForm, position: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
+                  className="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-black transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-bold shadow-lg shadow-blue-600/30 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 bg-gray-300 hover:bg-[#C5B5A9] text-black  rounded-md text-xs font-bold  transition disabled:opacity-50"
                 >
                   {formSubmitting ? (
                     <>
@@ -1183,20 +1183,20 @@ export const HrdDashboard: React.FC = () => {
       {/* MODAL 4: ATTENDANCE DETAIL VIEW */}
       {detailAttendance && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-md  overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
+          <div className="bg-gray-50 border border-gray-200 w-full max-w-2xl rounded-md  overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/80">
               <div>
-                <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                  <ClipboardList className="w-4 h-4 text-blue-400" />
+                <h3 className="text-base font-bold text-black flex items-center gap-2">
+                  <ClipboardList className="w-4 h-4 text-black" />
                   Attendance Detail Log
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-gray-500">
                   Date: {formatDate(detailAttendance.attendance_date)}
                 </p>
               </div>
               <button
                 onClick={() => setDetailAttendance(null)}
-                className="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-800"
+                className="text-gray-500 hover:text-black p-1.5 rounded-md hover:bg-gray-300/40"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1204,20 +1204,20 @@ export const HrdDashboard: React.FC = () => {
 
             <div className="p-6 overflow-y-auto space-y-6">
               {/* Employee Summary Card */}
-              <div className="bg-slate-950 p-4 rounded-md border border-slate-800 flex items-center justify-between">
+              <div className="bg-white p-4 rounded-md border border-gray-200 flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-100">
+                  <h4 className="text-sm font-bold text-black">
                     {detailAttendance.employee?.name || `Employee #${detailAttendance.employee_id}`}
                   </h4>
-                  <p className="text-xs text-blue-400 font-mono">
+                  <p className="text-xs text-black font-mono">
                     {detailAttendance.employee?.employee_number} &bull;{' '}
                     {detailAttendance.employee?.department || 'No Department'}
                   </p>
                 </div>
                 <span
                   className={`px-3 py-1 rounded-md text-xs font-bold ${detailAttendance.status === 'PRESENT'
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                    ? 'bg-gray-50 text-black border border-gray-200'
+                    : 'bg-gray-50 text-black border border-gray-200'
                     }`}
                 >
                   {detailAttendance.status}
@@ -1228,10 +1228,10 @@ export const HrdDashboard: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Check-In Photo */}
                 <div className="space-y-2">
-                  <span className="text-xs font-semibold text-slate-300 block">
+                  <span className="text-xs font-semibold text-black block">
                     Check-In Photo (at {formatTime(detailAttendance.check_in_at)})
                   </span>
-                  <div className="aspect-[4/3] bg-slate-950 rounded-md overflow-hidden border border-slate-800 flex items-center justify-center">
+                  <div className="aspect-[4/3] bg-white rounded-md overflow-hidden border border-gray-200 flex items-center justify-center">
                     {detailAttendance.check_in_photo ? (
                       <img
                         src={getPhotoUrl(detailAttendance.check_in_photo)}
@@ -1240,17 +1240,17 @@ export const HrdDashboard: React.FC = () => {
                         onClick={() => setSelectedPhoto(detailAttendance.check_in_photo)}
                       />
                     ) : (
-                      <span className="text-xs text-slate-500">No Photo</span>
+                      <span className="text-xs text-gray-500">No Photo</span>
                     )}
                   </div>
                 </div>
 
                 {/* Check-Out Photo */}
                 <div className="space-y-2">
-                  <span className="text-xs font-semibold text-slate-300 block">
+                  <span className="text-xs font-semibold text-black block">
                     Check-Out Photo (at {formatTime(detailAttendance.check_out_at)})
                   </span>
-                  <div className="aspect-[4/3] bg-slate-950 rounded-md overflow-hidden border border-slate-800 flex items-center justify-center">
+                  <div className="aspect-[4/3] bg-white rounded-md overflow-hidden border border-gray-200 flex items-center justify-center">
                     {detailAttendance.check_out_photo ? (
                       <img
                         src={getPhotoUrl(detailAttendance.check_out_photo)}
@@ -1259,7 +1259,7 @@ export const HrdDashboard: React.FC = () => {
                         onClick={() => setSelectedPhoto(detailAttendance.check_out_photo || null)}
                       />
                     ) : (
-                      <span className="text-xs text-slate-500">Not Checked Out Yet</span>
+                      <span className="text-xs text-gray-500">Not Checked Out Yet</span>
                     )}
                   </div>
                 </div>
@@ -1267,13 +1267,13 @@ export const HrdDashboard: React.FC = () => {
 
               {/* Coordinates & Notes */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="bg-slate-950 p-3 rounded-md border border-slate-800 space-y-1">
-                  <span className="text-slate-400 font-medium block">GPS Location</span>
+                <div className="bg-white p-3 rounded-md border border-gray-200 space-y-1">
+                  <span className="text-gray-500 font-medium block">GPS Location</span>
                   <a
                     href={`https://maps.google.com/?q=${detailAttendance.check_in_latitude},${detailAttendance.check_in_longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-blue-400 hover:underline font-mono"
+                    className="inline-flex items-center gap-1 text-black hover:underline font-mono"
                   >
                     <MapPin className="w-3.5 h-3.5" />
                     Lat: {detailAttendance.check_in_latitude}, Lng:{' '}
@@ -1281,19 +1281,19 @@ export const HrdDashboard: React.FC = () => {
                   </a>
                 </div>
 
-                <div className="bg-slate-950 p-3 rounded-md border border-slate-800 space-y-1">
-                  <span className="text-slate-400 font-medium block">Staff Notes</span>
-                  <p className="text-slate-200 italic">
+                <div className="bg-white p-3 rounded-md border border-gray-200 space-y-1">
+                  <span className="text-gray-500 font-medium block">Staff Notes</span>
+                  <p className="text-black italic">
                     {detailAttendance.notes ? `"${detailAttendance.notes}"` : 'No notes submitted'}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="px-6 py-3.5 border-t border-slate-800 bg-slate-900/80 text-right">
+            <div className="px-6 py-3.5 border-t border-gray-200 bg-gray-50/80 text-right">
               <button
                 onClick={() => setDetailAttendance(null)}
-                className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-md transition"
+                className="px-5 py-2 bg-gray-300/40 hover:bg-[#C5B5A9] text-black text-xs font-semibold rounded-md transition"
               >
                 Close
               </button>
@@ -1312,15 +1312,15 @@ export const HrdDashboard: React.FC = () => {
       {/* CHANGE PASSWORD MODAL */}
       {isPasswordModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-md  p-6 relative">
-            <h3 className="text-base font-bold text-slate-100 mb-2 flex items-center gap-2">
-              <Key className="w-4 h-4 text-blue-400" />
+          <div className="bg-gray-50 border border-gray-200 w-full max-w-sm rounded-md  p-6 relative">
+            <h3 className="text-base font-bold text-black mb-2 flex items-center gap-2">
+              <Key className="w-4 h-4 text-black" />
               Change Password
             </h3>
-            
+
             {passwordError && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-xs text-red-300 flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+              <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-md text-xs text-black flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
                 <span>{passwordError}</span>
               </div>
             )}
@@ -1329,7 +1329,7 @@ export const HrdDashboard: React.FC = () => {
               e.preventDefault();
               setPasswordLoading(true);
               setPasswordError(null);
-              
+
               if (passwordForm.newPassword !== passwordForm.confirmPassword) {
                 setPasswordError('New passwords do not match');
                 setPasswordLoading(false);
@@ -1358,7 +1358,7 @@ export const HrdDashboard: React.FC = () => {
             }}>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-black mb-1">
                     Current Password
                   </label>
                   <input
@@ -1366,12 +1366,12 @@ export const HrdDashboard: React.FC = () => {
                     required
                     value={passwordForm.oldPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-black mb-1">
                     New Password
                   </label>
                   <input
@@ -1379,12 +1379,12 @@ export const HrdDashboard: React.FC = () => {
                     required
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-black mb-1">
                     Confirm New Password
                   </label>
                   <input
@@ -1392,7 +1392,7 @@ export const HrdDashboard: React.FC = () => {
                     required
                     value={passwordForm.confirmPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
               </div>
@@ -1405,14 +1405,14 @@ export const HrdDashboard: React.FC = () => {
                     setPasswordError(null);
                   }}
                   disabled={passwordLoading}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md text-xs font-semibold transition"
+                  className="px-4 py-2 bg-gray-300/40 hover:bg-[#C5B5A9] text-black rounded-md text-xs font-semibold transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={passwordLoading}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white rounded-md text-xs font-semibold transition"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-300 hover:bg-[#C5B5A9] text-black disabled:opacity-60  rounded-md text-xs font-semibold transition"
                 >
                   {passwordLoading ? (
                     <>
@@ -1431,4 +1431,9 @@ export const HrdDashboard: React.FC = () => {
     </div>
   );
 };
+
+
+
+
+
 

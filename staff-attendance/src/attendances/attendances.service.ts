@@ -180,33 +180,36 @@ export class AttendancesService {
   }
 
   async getAllAttendances(filters: AttendanceFilterDto) {
-    const query: FindOptionsWhere<Attendance> = {};
+    const queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
+      .leftJoinAndSelect('attendance.employee', 'employee');
 
     if (filters) {
-      if (filters.employeeId) {
-        query.employee_id = filters.employeeId;
+      if (filters.employeeName) {
+        queryBuilder.andWhere('employee.name LIKE :name', { name: `%${filters.employeeName}%` });
       }
       if (filters.date) {
-        query.attendance_date = filters.date;
+        queryBuilder.andWhere('attendance.attendance_date = :date', { date: filters.date });
       }
       if (filters.startDate && filters.endDate) {
-        query.attendance_date = Between(filters.startDate, filters.endDate);
+        queryBuilder.andWhere('attendance.attendance_date BETWEEN :startDate AND :endDate', {
+          startDate: filters.startDate,
+          endDate: filters.endDate,
+        });
       }
       if (filters.status) {
-        query.status = filters.status;
+        queryBuilder.andWhere('attendance.status = :status', { status: filters.status });
       }
     }
 
     const { page = 1, limit = 10 } = filters;
     const skip = (page - 1) * limit;
 
-    const [attendances, total] = await this.attendanceRepository.findAndCount({
-      where: query,
-      skip,
-      take: limit,
-      relations: { employee: true },
-      order: { attendance_date: 'DESC', check_in_at: 'DESC' },
-    });
+    const [attendances, total] = await queryBuilder
+      .skip(skip)
+      .take(limit)
+      .orderBy('attendance.attendance_date', 'DESC')
+      .addOrderBy('attendance.check_in_at', 'DESC')
+      .getManyAndCount();
 
     return {
       data: attendances,
