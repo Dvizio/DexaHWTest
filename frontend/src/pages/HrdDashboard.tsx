@@ -346,11 +346,10 @@ export const HrdDashboard: React.FC = () => {
         {/* Global Notification */}
         {notification && (
           <div
-            className={`p-4 rounded-xl flex items-center justify-between border ${
-              notification.type === 'success'
+            className={`p-4 rounded-xl flex items-center justify-between border ${notification.type === 'success'
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                 : 'bg-red-500/10 border-red-500/30 text-red-300'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2.5 text-sm font-medium">
               {notification.type === 'success' ? (
@@ -373,11 +372,10 @@ export const HrdDashboard: React.FC = () => {
         <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
           <button
             onClick={() => setActiveTab('employees')}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition duration-200 cursor-pointer ${
-              activeTab === 'employees'
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'employees'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                 : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
-            }`}
+              }`}
           >
             <Users className="w-4 h-4" />
             Employee Management
@@ -385,11 +383,10 @@ export const HrdDashboard: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('attendances')}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition duration-200 cursor-pointer ${
-              activeTab === 'attendances'
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'attendances'
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                 : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
-            }`}
+              }`}
           >
             <ClipboardList className="w-4 h-4" />
             Attendance Monitoring
@@ -510,11 +507,10 @@ export const HrdDashboard: React.FC = () => {
                         </td>
                         <td className="py-3 px-4">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              emp.status === 'ACTIVE'
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${emp.status === 'ACTIVE'
                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                 : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                            }`}
+                              }`}
                           >
                             {emp.status}
                           </span>
@@ -536,11 +532,10 @@ export const HrdDashboard: React.FC = () => {
                                   ? 'Deactivate Account'
                                   : 'Activate Account'
                               }
-                              className={`p-1.5 rounded-lg transition ${
-                                emp.status === 'ACTIVE'
+                              className={`p-1.5 rounded-lg transition ${emp.status === 'ACTIVE'
                                   ? 'text-slate-400 hover:text-red-400 hover:bg-red-500/10'
                                   : 'text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10'
-                              }`}
+                                }`}
                             >
                               <Power className="w-3.5 h-3.5" />
                             </button>
@@ -666,7 +661,8 @@ export const HrdDashboard: React.FC = () => {
                     <th className="py-3 px-4">Check-In</th>
                     <th className="py-3 px-4">Check-Out</th>
                     <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">GPS Location</th>
+                    <th className="py-3 px-4">Check-In GPS</th>
+                    <th className="py-3 px-4">Check-Out GPS</th>
                     <th className="py-3 px-4">Notes</th>
                     <th className="py-3 px-4 text-center">Selfie Photos</th>
                     <th className="py-3 px-4 text-right">Detail</th>
@@ -675,7 +671,7 @@ export const HrdDashboard: React.FC = () => {
                 <tbody className="divide-y divide-slate-800/60">
                   {loadingAttendances ? (
                     <tr>
-                      <td colSpan={9} className="py-8 text-center text-slate-400">
+                      <td colSpan={10} className="py-8 text-center text-slate-400">
                         <div className="inline-flex items-center gap-2">
                           <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
                           <span>Loading company attendance logs...</span>
@@ -684,7 +680,7 @@ export const HrdDashboard: React.FC = () => {
                     </tr>
                   ) : attendances.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="py-8 text-center text-slate-400">
+                      <td colSpan={10} className="py-8 text-center text-slate-400">
                         No attendance records found matching filters.
                       </td>
                     </tr>
@@ -713,11 +709,10 @@ export const HrdDashboard: React.FC = () => {
                         </td>
                         <td className="py-3 px-4">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              att.status === 'PRESENT'
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${att.status === 'PRESENT'
                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                 : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                            }`}
+                              }`}
                           >
                             {att.status}
                           </span>
@@ -738,6 +733,27 @@ export const HrdDashboard: React.FC = () => {
                               ? att.check_in_longitude.toFixed(4)
                               : Number(att.check_in_longitude || 0).toFixed(4)}
                           </a>
+                        </td>
+                        <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
+                          {att.check_out_latitude && att.check_out_longitude ? (
+                            <a
+                              href={`https://maps.google.com/?q=${att.check_out_latitude},${att.check_out_longitude}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-indigo-400 hover:underline"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              {typeof att.check_out_latitude === 'number'
+                                ? att.check_out_latitude.toFixed(4)
+                                : Number(att.check_out_latitude || 0).toFixed(4)}
+                              ,{' '}
+                              {typeof att.check_out_longitude === 'number'
+                                ? att.check_out_longitude.toFixed(4)
+                                : Number(att.check_out_longitude || 0).toFixed(4)}
+                            </a>
+                          ) : (
+                            <span className="text-slate-500 italic">N/A</span>
+                          )}
                         </td>
                         <td className="py-3 px-4 text-slate-300 max-w-xs truncate">
                           {att.notes || <span className="text-slate-500 italic">None</span>}
@@ -1178,11 +1194,10 @@ export const HrdDashboard: React.FC = () => {
                   </p>
                 </div>
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    detailAttendance.status === 'PRESENT'
+                  className={`px-3 py-1 rounded-full text-xs font-bold ${detailAttendance.status === 'PRESENT'
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                       : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  }`}
+                    }`}
                 >
                   {detailAttendance.status}
                 </span>

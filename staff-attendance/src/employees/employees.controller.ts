@@ -33,6 +33,15 @@ export class EmployeesController {
     return this.employeesService.findMe(user.employeeId);
   }
 
+  @Post('change-password')
+  @Roles(UserRole.EMPLOYEE, UserRole.HRD)
+  changePassword(
+    @CurrentUser() user: any,
+    @Body() changePasswordDto: any,
+  ) {
+    return this.employeesService.changePassword(user.employeeId, changePasswordDto);
+  }
+
   @Post()
   @Roles(UserRole.HRD)
   create(@Body() createEmployeeDto: CreateEmployeeDto) {

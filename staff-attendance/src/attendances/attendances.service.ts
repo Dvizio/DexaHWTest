@@ -42,7 +42,7 @@ export class AttendancesService {
 
     const now = moment();
     const attendanceDate = now.format('YYYY-MM-DD'); // string type
-    const checkInTime = now.format('HH:mm');
+    const checkInTime = now.toDate(); // Date object
     const attendanceTime = now.format('HH:mm:ss');
 
     const lateTime = process.env.ATTENDANCE_LATE_TIME || '09:00';

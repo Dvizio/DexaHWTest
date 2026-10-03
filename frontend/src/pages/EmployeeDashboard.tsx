@@ -40,6 +40,10 @@ export const EmployeeDashboard: React.FC = () => {
   const [isWebcamOpen, setIsWebcamOpen] = useState<boolean>(false);
   const [webcamType, setWebcamType] = useState<'check-in' | 'check-out'>('check-in');
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
+  const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordLoading, setPasswordLoading] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // Loading & Alert states
   const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
@@ -267,7 +271,12 @@ export const EmployeeDashboard: React.FC = () => {
 
             <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
               <span>Account: @{profile?.user?.username}</span>
-              <span className="text-emerald-400 font-medium">Verified Active</span>
+              <button
+                onClick={() => setIsPasswordModalOpen(true)}
+                className="text-blue-400 hover:underline font-medium"
+              >
+                Change Password
+              </button>
             </div>
           </div>
 
@@ -683,6 +692,112 @@ export const EmployeeDashboard: React.FC = () => {
         onClose={() => setSelectedPhoto(null)}
         photoPath={selectedPhoto}
       />
+
+      {/* Change Password Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl shadow-2xl p-6 relative">
+            <h3 className="text-base font-bold text-slate-100 mb-2">Change Password</h3>
+            
+            {passwordError && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-xs text-red-300">
+                {passwordError}
+              </div>
+            )}
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setPasswordLoading(true);
+              setPasswordError(null);
+              
+              if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+                setPasswordError('New passwords do not match');
+                setPasswordLoading(false);
+                return;
+              }
+
+              if (passwordForm.newPassword.length < 6) {
+                setPasswordError('New password must be at least 6 characters');
+                setPasswordLoading(false);
+                return;
+              }
+
+              try {
+                await apiClient.post('/employees/change-password', {
+                  oldPassword: passwordForm.oldPassword,
+                  newPassword: passwordForm.newPassword,
+                });
+                setActionAlert({ type: 'success', message: 'Password updated successfully!' });
+                setIsPasswordModalOpen(false);
+                setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+              } catch (err: any) {
+                setPasswordError(err.response?.data?.message || 'Failed to change password');
+              } finally {
+                setPasswordLoading(false);
+              }
+            }}>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.oldPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordModalOpen(false)}
+                  disabled={passwordLoading}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white rounded-xl text-xs font-semibold"
+                >
+                  {passwordLoading ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

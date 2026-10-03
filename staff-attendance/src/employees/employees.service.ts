@@ -9,6 +9,7 @@ import {
   UpdateEmployeeDto,
   UpdateEmployeeStatusDto,
 } from './dto/employee.dto.js';
+import { ChangePasswordDto } from './dto/change-password.dto.js';
 
 @Injectable()
 export class EmployeesService {
@@ -19,7 +20,7 @@ export class EmployeesService {
     private userRepository: Repository<User>,
   ) { }
 
-  async create(createEmployeeDto: CreateEmployeeDto, role: UserRole = UserRole.EMPLOYEE) {
+  async create(createEmployeeDto: CreateEmployeeDto) {
     const employeeExists = await this.employeeRepository.findOne({
       where: [
         { employee_number: createEmployeeDto.employee_number },
@@ -31,31 +32,60 @@ export class EmployeesService {
       throw new ConflictException('Employee number or email already exists');
     }
 
-    const employee = this.employeeRepository.create({
-      ...createEmployeeDto,
-      status: EmployeeStatus.ACTIVE,
-    });
-    await this.employeeRepository.save(employee);
-
     const username = createEmployeeDto.email.split('@')[0];
     const password = 'Welcome123!';
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = this.userRepository.create({
-      employee_id: employee.id,
-      username,
-      password_hash: passwordHash,
-      role,
-      is_active: true,
-    });
-    await this.userRepository.save(user);
+    const isHR = createEmployeeDto.position?.trim().toLowerCase() === 'hr manager';
+    const role = isHR ? UserRole.HRD : UserRole.EMPLOYEE;
 
-    const { password_hash, ...userWithoutHash } = user;
-    return {
-      employee,
-      user: userWithoutHash,
-      temporaryPassword: password,
-    };
+    return this.employeeRepository.manager.transaction(async (transactionalEntityManager) => {
+      const employee = transactionalEntityManager.create(Employee, {
+        ...createEmployeeDto,
+        status: EmployeeStatus.ACTIVE,
+      });
+      const savedEmployee = await transactionalEntityManager.save(employee);
+
+      const user = transactionalEntityManager.create(User, {
+        employee_id: savedEmployee.id,
+        username,
+        password_hash: passwordHash,
+        role,
+        is_active: true,
+      });
+      const savedUser = await transactionalEntityManager.save(user);
+
+      const { password_hash, ...userWithoutHash } = savedUser;
+      return {
+        employee: savedEmployee,
+        user: userWithoutHash,
+        temporaryPassword: password,
+      };
+    });
+  }
+
+  async changePassword(employeeId: number, changePasswordDto: ChangePasswordDto) {
+    const employee = await this.employeeRepository.findOne({
+      where: { id: employeeId },
+      relations: { user: true },
+    });
+
+    if (!employee) {
+      throw new NotFoundException(`Employee with ID ${employeeId} not found`);
+    }
+
+    const isMatch = await bcrypt.compare(changePasswordDto.oldPassword, employee.user.password_hash);
+    if (!isMatch) {
+      throw new ConflictException('Current password is incorrect');
+    }
+
+    const passwordHash = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    await this.userRepository.update(
+      { employee_id: employeeId },
+      { password_hash: passwordHash }
+    );
+
+    return { message: 'Password updated successfully' };
   }
 
   async findAll(filters: {
