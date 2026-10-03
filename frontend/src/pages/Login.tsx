@@ -173,7 +173,7 @@ export const Login: React.FC = () => {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-500 mt-6">
-          Staff Attendance System &bull; Secure JWT Authentication
+          &copy; 2023 Dexa Employee Management. All rights reserved.
         </p>
       </div>
     </div>
