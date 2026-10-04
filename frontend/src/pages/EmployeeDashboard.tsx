@@ -4,6 +4,7 @@ import { WebcamModal } from '../components/WebcamModal';
 import { PhotoModal } from '../components/PhotoModal';
 import { apiClient } from '../api/client';
 import type { Employee, Attendance, PaginatedResponse } from '../types';
+import axios from 'axios';
 import {
   Clock,
   Calendar,
@@ -55,8 +56,9 @@ export const EmployeeDashboard: React.FC = () => {
   } | null>(null);
 
   // Fetch Employee Profile
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     setLoadingProfile(true);
+
     try {
       const res = await apiClient.get<Employee>('/employees/me');
       setProfile(res.data);
@@ -65,7 +67,7 @@ export const EmployeeDashboard: React.FC = () => {
     } finally {
       setLoadingProfile(false);
     }
-  };
+  }, []);
 
   // Fetch Today's Attendance
   const fetchTodayAttendance = useCallback(async () => {
@@ -85,7 +87,7 @@ export const EmployeeDashboard: React.FC = () => {
     async (pageToLoad = pagination.page) => {
       setLoadingHistory(true);
       try {
-        const params: any = {
+        const params: Record<string, string | number> = {
           page: pageToLoad,
           limit: pagination.limit,
         };
@@ -118,11 +120,11 @@ export const EmployeeDashboard: React.FC = () => {
   useEffect(() => {
     fetchProfile();
     fetchTodayAttendance();
-  }, [fetchTodayAttendance]);
+  }, [fetchProfile, fetchTodayAttendance]);
 
   useEffect(() => {
     fetchHistory(1);
-  }, [startDate, endDate, statusFilter]);
+  }, [fetchHistory]);
 
   // Trigger Check-In or Check-Out Modal
   const handleOpenAttendanceModal = (type: 'check-in' | 'check-out') => {
@@ -145,23 +147,26 @@ export const EmployeeDashboard: React.FC = () => {
 
       setActionAlert({
         type: 'success',
-        message: `Successfully recorded ${
-          webcamType === 'check-in' ? 'Check-In' : 'Check-Out'
-        }!`,
+        message: `Successfully recorded ${webcamType === 'check-in' ? 'Check-In' : 'Check-Out'
+          }!`,
       });
 
       // Refresh data
       await fetchTodayAttendance();
       await fetchHistory(1);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Attendance submit error', err);
-      const msg =
-        err.response?.data?.message ||
-        `Failed to submit ${webcamType === 'check-in' ? 'Check-In' : 'Check-Out'}`;
+
+      const msg = axios.isAxiosError(err)
+        ? err.response?.data?.message ||
+        `Failed to submit ${webcamType === 'check-in' ? 'Check-In' : 'Check-Out'}`
+        : `Failed to submit ${webcamType === 'check-in' ? 'Check-In' : 'Check-Out'}`;
+
       setActionAlert({
         type: 'error',
         message: Array.isArray(msg) ? msg[0] : msg,
       });
+
       throw err;
     }
   };
@@ -193,11 +198,10 @@ export const EmployeeDashboard: React.FC = () => {
         {/* Global Notification Banner */}
         {actionAlert && (
           <div
-            className={`p-4 rounded-md flex items-center justify-between border ${
-              actionAlert.type === 'success'
-                ? 'bg-gray-50 border-gray-200 text-black'
-                : 'bg-gray-50 border-gray-200 text-black'
-            }`}
+            className={`p-4 rounded-md flex items-center justify-between border ${actionAlert.type === 'success'
+              ? 'bg-gray-50 border-gray-200 text-black'
+              : 'bg-gray-50 border-gray-200 text-black'
+              }`}
           >
             <div className="flex items-center gap-2.5 text-sm font-medium">
               {actionAlert.type === 'success' ? (
@@ -360,11 +364,10 @@ export const EmployeeDashboard: React.FC = () => {
                             Checked In at {formatTime(todayAttendance.check_in_at)}
                           </h4>
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                              todayAttendance.status === 'PRESENT'
-                                ? 'bg-gray-50 text-black border border-gray-200'
-                                : 'bg-gray-50 text-black border border-gray-200'
-                            }`}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${todayAttendance.status === 'PRESENT'
+                              ? 'bg-gray-50 text-black border border-gray-200'
+                              : 'bg-gray-50 text-black border border-gray-200'
+                              }`}
                           >
                             {todayAttendance.status === 'PRESENT' ? 'ON TIME' : 'LATE'}
                           </span>
@@ -428,11 +431,10 @@ export const EmployeeDashboard: React.FC = () => {
                       </div>
                     </div>
                     <span
-                      className={`text-xs font-bold px-2.5 py-1 rounded-md ${
-                        todayAttendance.status === 'PRESENT'
-                          ? 'bg-gray-50 text-black border border-gray-200'
-                          : 'bg-gray-50 text-black border border-gray-200'
-                      }`}
+                      className={`text-xs font-bold px-2.5 py-1 rounded-md ${todayAttendance.status === 'PRESENT'
+                        ? 'bg-gray-50 text-black border border-gray-200'
+                        : 'bg-gray-50 text-black border border-gray-200'
+                        }`}
                     >
                       {todayAttendance.status === 'PRESENT' ? 'PRESENT' : 'LATE'}
                     </span>
@@ -592,11 +594,10 @@ export const EmployeeDashboard: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                            record.status === 'PRESENT'
-                              ? 'bg-gray-50 text-black border border-gray-200'
-                              : 'bg-gray-50 text-black border border-gray-200'
-                          }`}
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${record.status === 'PRESENT'
+                            ? 'bg-gray-50 text-black border border-gray-200'
+                            : 'bg-gray-50 text-black border border-gray-200'
+                            }`}
                         >
                           {record.status === 'PRESENT' ? 'PRESENT' : 'LATE'}
                         </span>
@@ -698,7 +699,7 @@ export const EmployeeDashboard: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
           <div className="bg-gray-50 border border-gray-200 w-full max-w-sm rounded-md  p-6 relative">
             <h3 className="text-base font-bold text-black mb-2">Change Password</h3>
-            
+
             {passwordError && (
               <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-md text-xs text-black">
                 {passwordError}
@@ -709,7 +710,7 @@ export const EmployeeDashboard: React.FC = () => {
               e.preventDefault();
               setPasswordLoading(true);
               setPasswordError(null);
-              
+
               if (passwordForm.newPassword !== passwordForm.confirmPassword) {
                 setPasswordError('New passwords do not match');
                 setPasswordLoading(false);
@@ -730,8 +731,12 @@ export const EmployeeDashboard: React.FC = () => {
                 setActionAlert({ type: 'success', message: 'Password updated successfully!' });
                 setIsPasswordModalOpen(false);
                 setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
-              } catch (err: any) {
-                setPasswordError(err.response?.data?.message || 'Failed to change password');
+              } catch (err: unknown) {
+                const message = axios.isAxiosError(err)
+                  ? err.response?.data?.message
+                  : undefined;
+
+                setPasswordError(message || 'Failed to change password');
               } finally {
                 setPasswordLoading(false);
               }
