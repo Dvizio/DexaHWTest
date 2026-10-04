@@ -185,7 +185,10 @@ export class AttendancesService {
 
     if (filters) {
       if (filters.employeeName) {
-        queryBuilder.andWhere('employee.name LIKE :name', { name: `%${filters.employeeName}%` });
+        queryBuilder.andWhere(
+          '(employee.name LIKE :search OR employee.department LIKE :search)',
+          { search: `%${filters.employeeName}%` },
+        );
       }
       if (filters.date) {
         queryBuilder.andWhere('attendance.attendance_date = :date', { date: filters.date });
