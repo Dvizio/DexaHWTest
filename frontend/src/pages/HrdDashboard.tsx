@@ -354,8 +354,8 @@ export const HrdDashboard: React.FC = () => {
         {notification && (
           <div
             className={`p-4 rounded-md flex items-center justify-between border ${notification.type === 'success'
-              ? 'bg-gray-50 border-gray-200 text-black'
-              : 'bg-gray-50 border-gray-200 text-black'
+              ? 'bg-green-50 border-gray-200 text-black'
+              : 'bg-red-50 border-gray-200 text-black'
               }`}
           >
             <div className="flex items-center gap-2.5 text-sm font-medium">
