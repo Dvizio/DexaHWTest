@@ -1,6 +1,6 @@
 # Staff Attendance System
 
-Full-stack attendance management system with face verification.
+Full-stack attendance management system.
 
 ## Prerequisites
 
