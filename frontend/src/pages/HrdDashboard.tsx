@@ -29,6 +29,7 @@ import {
   Phone,
   Key,
 } from 'lucide-react';
+import axios from 'axios';
 
 export const HrdDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'employees' | 'attendances'>('employees');
@@ -111,7 +112,7 @@ export const HrdDashboard: React.FC = () => {
     async (page = empPagination.page) => {
       setLoadingEmployees(true);
       try {
-        const params: any = {
+        const params: Record<string, string | number> = {
           page,
           limit: empPagination.limit,
         };
@@ -145,7 +146,7 @@ export const HrdDashboard: React.FC = () => {
     async (page = attPagination.page) => {
       setLoadingAttendances(true);
       try {
-        const params: any = {
+        const params: Record<string, string | number> = {
           page,
           limit: attPagination.limit,
         };
@@ -229,10 +230,12 @@ export const HrdDashboard: React.FC = () => {
       });
 
       fetchEmployees(1);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Create employee error', err);
-      const msg =
-        err.response?.data?.message || 'Failed to create employee';
+
+      const msg = axios.isAxiosError(err)
+        ? err.response?.data?.message || 'Failed to create employee'
+        : 'Failed to create employee';
       setFormError(Array.isArray(msg) ? msg[0] : msg);
     } finally {
       setFormSubmitting(false);
@@ -279,9 +282,9 @@ export const HrdDashboard: React.FC = () => {
       });
 
       fetchEmployees(empPagination.page);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Update employee error', err);
-      const msg = err.response?.data?.message || 'Failed to update employee';
+      const msg = axios.isAxiosError(err) ? err.response?.data?.message || 'Failed to update employee' : 'Failed to update employee';
       setFormError(Array.isArray(msg) ? msg[0] : msg);
     } finally {
       setFormSubmitting(false);
@@ -311,7 +314,7 @@ export const HrdDashboard: React.FC = () => {
       });
 
       fetchEmployees(empPagination.page);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Toggle status error', err);
       setNotification({
         type: 'error',
@@ -1350,8 +1353,8 @@ export const HrdDashboard: React.FC = () => {
                 setNotification({ type: 'success', message: 'Password updated successfully!' });
                 setIsPasswordModalOpen(false);
                 setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
-              } catch (err: any) {
-                setPasswordError(err.response?.data?.message || 'Failed to change password');
+              } catch (err: unknown) {
+                setPasswordError(axios.isAxiosError(err) ? err.response?.data?.message || 'Failed to change password' : 'Failed to change password');
               } finally {
                 setPasswordLoading(false);
               }
