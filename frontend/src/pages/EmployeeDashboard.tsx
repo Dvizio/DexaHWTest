@@ -1,24 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { Navbar } from '../components/Navbar';
 import { WebcamModal } from '../components/WebcamModal';
 import { PhotoModal } from '../components/PhotoModal';
+import { EmployeeProfile } from '../components/EmployeeProfile';
+import { EmployeeAttendanceStatusCard } from '../components/EmployeeAttendanceStatusCard';
 import { apiClient } from '../api/client';
 import type { Employee, Attendance, PaginatedResponse } from '../types';
-import axios from 'axios';
 import {
   Clock,
-  Calendar,
   CheckCircle,
   AlertCircle,
-  LogIn,
-  LogOut,
   MapPin,
-  FileText,
   ChevronLeft,
   ChevronRight,
-  ImageIcon,
   RefreshCw,
-  Sparkles,
 } from 'lucide-react';
 
 export const EmployeeDashboard: React.FC = () => {
@@ -42,7 +38,11 @@ export const EmployeeDashboard: React.FC = () => {
   const [webcamType, setWebcamType] = useState<'check-in' | 'check-out'>('check-in');
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
-  const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
   const [passwordLoading, setPasswordLoading] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
@@ -58,7 +58,6 @@ export const EmployeeDashboard: React.FC = () => {
   // Fetch Employee Profile
   const fetchProfile = useCallback(async () => {
     setLoadingProfile(true);
-
     try {
       const res = await apiClient.get<Employee>('/employees/me');
       setProfile(res.data);
@@ -118,28 +117,43 @@ export const EmployeeDashboard: React.FC = () => {
   );
 
   useEffect(() => {
-    fetchProfile();
-    fetchTodayAttendance();
+    let ignore = false;
+
+    const initData = async () => {
+      if (!ignore) {
+        await Promise.all([fetchProfile(), fetchTodayAttendance()]);
+      }
+    };
+
+    initData();
+
+    return () => {
+      ignore = true;
+    };
   }, [fetchProfile, fetchTodayAttendance]);
 
   useEffect(() => {
-    fetchHistory(1);
+    let ignore = false;
+
+    if (!ignore) {
+      fetchHistory(1);
+    }
+
+    return () => {
+      ignore = true;
+    };
   }, [fetchHistory]);
 
-  // Trigger Check-In or Check-Out Modal
   const handleOpenAttendanceModal = (type: 'check-in' | 'check-out') => {
     setWebcamType(type);
     setIsWebcamOpen(true);
   };
 
-  // Submit Check-In / Check-Out
   const handleAttendanceSubmit = async (formData: FormData) => {
     setActionAlert(null);
     try {
       const endpoint =
-        webcamType === 'check-in'
-          ? '/attendances/check-in'
-          : '/attendances/check-out';
+        webcamType === 'check-in' ? '/attendances/check-in' : '/attendances/check-out';
 
       await apiClient.post(endpoint, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -151,7 +165,6 @@ export const EmployeeDashboard: React.FC = () => {
           }!`,
       });
 
-      // Refresh data
       await fetchTodayAttendance();
       await fetchHistory(1);
     } catch (err: unknown) {
@@ -222,273 +235,24 @@ export const EmployeeDashboard: React.FC = () => {
 
         {/* Top Section: Profile Card & Today's Attendance Status */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Card */}
-          <div className="bg-gray-50 border border-gray-200 rounded-md p-6  relative overflow-hidden flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                  Employee Profile
-                </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-gray-50 text-black border border-gray-200">
-                  {profile?.status || 'ACTIVE'}
-                </span>
-              </div>
+          <EmployeeProfile
+            profile={profile}
+            loadingProfile={loadingProfile}
+            setIsPasswordModalOpen={setIsPasswordModalOpen}
+          />
 
-              {loadingProfile ? (
-                <div className="space-y-2 py-4 animate-pulse">
-                  <div className="h-5 bg-gray-300/40 rounded w-2/3" />
-                  <div className="h-4 bg-gray-300/40 rounded w-1/2" />
-                  <div className="h-4 bg-gray-300/40 rounded w-3/4" />
-                </div>
-              ) : (
-                <div>
-                  <h2 className="text-xl font-bold text-black">{profile?.name}</h2>
-                  <p className="text-xs text-black font-mono mt-0.5">
-                    {profile?.employee_number}
-                  </p>
-
-                  <div className="mt-4 space-y-2 text-xs text-black">
-                    <div className="flex items-center justify-between py-1 border-b border-gray-200/60">
-                      <span className="text-gray-500">Department</span>
-                      <span className="font-medium text-black">
-                        {profile?.department || '-'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-b border-gray-200/60">
-                      <span className="text-gray-500">Position</span>
-                      <span className="font-medium text-black">
-                        {profile?.position || '-'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-b border-gray-200/60">
-                      <span className="text-gray-500">Email</span>
-                      <span className="font-medium text-black">{profile?.email}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-gray-500">Phone</span>
-                      <span className="font-medium text-black">{profile?.phone || '-'}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between text-[11px] text-gray-500">
-              <span>Account: @{profile?.user?.username}</span>
-              <button
-                onClick={() => setIsPasswordModalOpen(true)}
-                className="text-black hover:underline font-medium"
-              >
-                Change Password
-              </button>
-            </div>
-          </div>
-
-          {/* Today's Attendance Status Card (2 Columns Span on LG) */}
-          <div className="lg:col-span-2 bg-gray-50/80 border border-gray-200 rounded-md p-6  flex flex-col justify-between relative">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-md bg-gray-50 text-black flex items-center justify-center">
-                    <Calendar className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-black">
-                      Today's Attendance
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      {new Date().toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={fetchTodayAttendance}
-                  disabled={loadingToday}
-                  className="text-gray-500 hover:text-black p-1.5 rounded-md hover:bg-gray-300/40 transition"
-                  title="Refresh Today's Status"
-                >
-                  <RefreshCw
-                    className={`w-4 h-4 ${loadingToday ? 'animate-spin text-black' : ''}`}
-                  />
-                </button>
-              </div>
-
-              {/* Dynamic Status Section */}
-              {loadingToday ? (
-                <div className="py-8 flex items-center justify-center text-gray-500 gap-2">
-                  <RefreshCw className="w-5 h-5 animate-spin text-black" />
-                  <span className="text-xs">Loading today's attendance...</span>
-                </div>
-              ) : !todayAttendance ? (
-                /* STATE 1: NOT CHECKED IN */
-                <div className="bg-white/60 border border-gray-200/80 rounded-md p-5 my-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-md bg-gray-50 border border-gray-200 flex items-center justify-center text-black flex-shrink-0">
-                      <Clock className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-black">
-                        You have not checked in today
-                      </h4>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Please take a selfie with GPS verification to record your check-in.
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleOpenAttendanceModal('check-in')}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-300 hover:bg-[#C5B5A9] text-black  text-sm font-bold rounded-md  transition duration-200 cursor-pointer flex-shrink-0"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Check In Now
-                  </button>
-                </div>
-              ) : !todayAttendance.check_out_at ? (
-                /* STATE 2: CHECKED IN, PENDING CHECK OUT */
-                <div className="bg-white/60 border border-gray-200/80 rounded-md p-5 my-2 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-md bg-gray-50 border border-gray-200 flex items-center justify-center text-black flex-shrink-0">
-                        <CheckCircle className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-semibold text-black">
-                            Checked In at {formatTime(todayAttendance.check_in_at)}
-                          </h4>
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${todayAttendance.status === 'PRESENT'
-                              ? 'bg-gray-50 text-black border border-gray-200'
-                              : 'bg-gray-50 text-black border border-gray-200'
-                              }`}
-                          >
-                            {todayAttendance.status === 'PRESENT' ? 'ON TIME' : 'LATE'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Working active shift. Don't forget to check out at the end of your day!
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => handleOpenAttendanceModal('check-out')}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-300 hover:bg-[#C5B5A9] text-black  text-sm font-bold rounded-md  transition duration-200 cursor-pointer flex-shrink-0"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Check Out
-                    </button>
-                  </div>
-
-                  {/* Check-In Details pill */}
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 bg-gray-50/80 p-3 rounded-md border border-gray-200">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-black" />
-                      <span>
-                        Lat: {todayAttendance.check_in_latitude}, Lng:{' '}
-                        {todayAttendance.check_in_longitude}
-                      </span>
-                    </div>
-                    {todayAttendance.notes && (
-                      <div className="flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-gray-500" />
-                        <span className="italic text-black">"{todayAttendance.notes}"</span>
-                      </div>
-                    )}
-                    {todayAttendance.check_in_photo && (
-                      <button
-                        onClick={() => setSelectedPhoto(todayAttendance.check_in_photo)}
-                        className="inline-flex items-center gap-1 text-black hover:underline cursor-pointer ml-auto"
-                      >
-                        <ImageIcon className="w-3.5 h-3.5" />
-                        View Check-In Photo
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                /* STATE 3: COMPLETED FOR TODAY */
-                <div className="bg-white/60 border border-gray-200/80 rounded-md p-5 my-2 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-md bg-gray-50 border border-gray-200 flex items-center justify-center text-black">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-black">
-                          Attendance Completed for Today
-                        </h4>
-                        <p className="text-xs text-gray-500">
-                          Both Check-In and Check-Out have been recorded successfully.
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      className={`text-xs font-bold px-2.5 py-1 rounded-md ${todayAttendance.status === 'PRESENT'
-                        ? 'bg-gray-50 text-black border border-gray-200'
-                        : 'bg-gray-50 text-black border border-gray-200'
-                        }`}
-                    >
-                      {todayAttendance.status === 'PRESENT' ? 'PRESENT' : 'LATE'}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-gray-50/80 p-3 rounded-md border border-gray-200">
-                    <div>
-                      <span className="text-gray-500 block text-[11px]">Check-In Time</span>
-                      <span className="font-semibold text-black">
-                        {formatTime(todayAttendance.check_in_at)}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block text-[11px]">Check-Out Time</span>
-                      <span className="font-semibold text-black">
-                        {formatTime(todayAttendance.check_out_at)}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block text-[11px]">Check-In Photo</span>
-                      <button
-                        onClick={() => setSelectedPhoto(todayAttendance.check_in_photo)}
-                        className="text-black hover:underline font-medium"
-                      >
-                        View Photo
-                      </button>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block text-[11px]">Check-Out Photo</span>
-                      {todayAttendance.check_out_photo ? (
-                        <button
-                          onClick={() => setSelectedPhoto(todayAttendance.check_out_photo || null)}
-                          className="text-black hover:underline font-medium"
-                        >
-                          View Photo
-                        </button>
-                      ) : (
-                        <span className="text-gray-500">-</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="text-[11px] text-gray-500 flex items-center justify-between border-t border-gray-200 pt-3 mt-2">
-              <span>Cutoff Late Threshold: 09:00 AM</span>
-              <span>All timestamps recorded in local server time</span>
-            </div>
-          </div>
+          <EmployeeAttendanceStatusCard
+            todayAttendance={todayAttendance}
+            loadingToday={loadingToday}
+            onRefresh={fetchTodayAttendance}
+            onOpenModal={handleOpenAttendanceModal}
+            onSelectPhoto={setSelectedPhoto}
+            formatTime={formatTime}
+          />
         </div>
 
         {/* Attendance History Section */}
-        <div className="bg-gray-50 border border-gray-200 rounded-md p-6  space-y-4">
+        <div className="bg-gray-50 border border-gray-200 rounded-md p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-200">
             <div>
               <h3 className="text-base font-bold text-black flex items-center gap-2">
@@ -581,7 +345,7 @@ export const EmployeeDashboard: React.FC = () => {
                   history.map((record) => (
                     <tr
                       key={record.id}
-                      className="hover:bg-gray-300/40/40 transition-colors"
+                      className="hover:bg-gray-300/40 transition-colors"
                     >
                       <td className="py-3 px-4 font-medium text-black whitespace-nowrap">
                         {formatDate(record.attendance_date)}
@@ -696,8 +460,8 @@ export const EmployeeDashboard: React.FC = () => {
 
       {/* Change Password Modal */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-fadeIn">
-          <div className="bg-gray-50 border border-gray-200 w-full max-w-sm rounded-md  p-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-fadeIn">
+          <div className="bg-gray-50 border border-gray-200 w-full max-w-sm rounded-md p-6 relative">
             <h3 className="text-base font-bold text-black mb-2">Change Password</h3>
 
             {passwordError && (
@@ -706,41 +470,50 @@ export const EmployeeDashboard: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              setPasswordLoading(true);
-              setPasswordError(null);
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setPasswordLoading(true);
+                setPasswordError(null);
 
-              if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-                setPasswordError('New passwords do not match');
-                setPasswordLoading(false);
-                return;
-              }
+                if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+                  setPasswordError('New passwords do not match');
+                  setPasswordLoading(false);
+                  return;
+                }
 
-              if (passwordForm.newPassword.length < 6) {
-                setPasswordError('New password must be at least 6 characters');
-                setPasswordLoading(false);
-                return;
-              }
+                if (passwordForm.newPassword.length < 6) {
+                  setPasswordError('New password must be at least 6 characters');
+                  setPasswordLoading(false);
+                  return;
+                }
 
-              try {
-                await apiClient.post('/employees/change-password', {
-                  oldPassword: passwordForm.oldPassword,
-                  newPassword: passwordForm.newPassword,
-                });
-                setActionAlert({ type: 'success', message: 'Password updated successfully!' });
-                setIsPasswordModalOpen(false);
-                setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
-              } catch (err: unknown) {
-                const message = axios.isAxiosError(err)
-                  ? err.response?.data?.message
-                  : undefined;
+                try {
+                  await apiClient.post('/employees/change-password', {
+                    oldPassword: passwordForm.oldPassword,
+                    newPassword: passwordForm.newPassword,
+                  });
+                  setActionAlert({
+                    type: 'success',
+                    message: 'Password updated successfully!',
+                  });
+                  setIsPasswordModalOpen(false);
+                  setPasswordForm({
+                    oldPassword: '',
+                    newPassword: '',
+                    confirmPassword: '',
+                  });
+                } catch (err: unknown) {
+                  const message = axios.isAxiosError(err)
+                    ? err.response?.data?.message
+                    : undefined;
 
-                setPasswordError(message || 'Failed to change password');
-              } finally {
-                setPasswordLoading(false);
-              }
-            }}>
+                  setPasswordError(message || 'Failed to change password');
+                } finally {
+                  setPasswordLoading(false);
+                }
+              }}
+            >
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold text-black mb-1">
@@ -750,7 +523,9 @@ export const EmployeeDashboard: React.FC = () => {
                     type="password"
                     required
                     value={passwordForm.oldPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordForm({ ...passwordForm, oldPassword: e.target.value })
+                    }
                     className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
@@ -763,7 +538,9 @@ export const EmployeeDashboard: React.FC = () => {
                     type="password"
                     required
                     value={passwordForm.newPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+                    }
                     className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
@@ -776,7 +553,9 @@ export const EmployeeDashboard: React.FC = () => {
                     type="password"
                     required
                     value={passwordForm.confirmPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+                    }
                     className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
                   />
                 </div>
@@ -787,14 +566,14 @@ export const EmployeeDashboard: React.FC = () => {
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}
                   disabled={passwordLoading}
-                  className="px-4 py-2 bg-gray-300/40 hover:bg-[#C5B5A9] text-black rounded-md text-xs font-semibold"
+                  className="px-4 py-2 bg-gray-300/40 hover:bg-[#C5B5A9] text-black rounded-md text-xs font-semibold transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={passwordLoading}
-                  className="px-4 py-2 bg-gray-300 hover:bg-[#C5B5A9] text-black disabled:opacity-60  rounded-md text-xs font-semibold"
+                  className="px-4 py-2 bg-gray-300 hover:bg-[#C5B5A9] text-black disabled:opacity-60 rounded-md text-xs font-semibold transition"
                 >
                   {passwordLoading ? 'Updating...' : 'Update Password'}
                 </button>
@@ -806,9 +585,3 @@ export const EmployeeDashboard: React.FC = () => {
     </div>
   );
 };
-
-
-
-
-
-
