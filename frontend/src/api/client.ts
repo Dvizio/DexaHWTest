@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -9,36 +10,73 @@ export const apiClient = axios.create({
   },
 });
 
-// Attach JWT token automatically
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
-// Global response error interceptor
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // If token expired or user is unauthorized, clear storage and redirect
-      const isLoginRequest = error.config?.url?.includes('/auth/login');
-      if (!isLoginRequest) {
+  async (error) => {
+    const originalRequest = error.config;
+
+    const isLoginRequest = originalRequest?.url?.includes('/auth/login');
+    const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh-token');
+
+    if (
+      error.response?.status === 401 &&
+      !isLoginRequest &&
+      !isRefreshRequest &&
+      !originalRequest?._retry
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+
+        if (!refreshToken) {
+          throw new Error('No refresh token');
+        }
+
+        const response = await axios.post<{ access_token: string }>(
+          `${API_BASE_URL}/auth/refresh-token`,
+          {
+            refresh_token: refreshToken,
+          },
+        );
+
+        const newAccessToken = response.data.access_token;
+
+        localStorage.setItem('token', newAccessToken);
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        return apiClient(originalRequest);
+      } catch (refreshError) {
         localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
+
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
+
+        return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
-  }
+  },
 );
+
 
 export const getPhotoUrl = (photoPath: string | null | undefined): string => {
   if (!photoPath) return '';

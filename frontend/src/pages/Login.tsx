@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import type { AuthResponse } from '../types';
 import { Clock, Lock, User, Eye, EyeOff, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import axios from 'axios';
 
 export const Login: React.FC = () => {
   const { isAuthenticated, user, login } = useAuth();
@@ -20,7 +21,7 @@ export const Login: React.FC = () => {
     return <Navigate to={user.role === 'HRD' ? '/hrd' : '/employee'} replace />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password');
@@ -33,7 +34,7 @@ export const Login: React.FC = () => {
     try {
       const response = await apiClient.post<AuthResponse>('/auth/login', {
         username: username.trim(),
-        password: password.trim(),
+        password: password
       });
 
       login(response.data);
@@ -43,11 +44,16 @@ export const Login: React.FC = () => {
       } else {
         navigate('/employee');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Login error', err);
-      const serverMessage =
-        err.response?.data?.message || 'Invalid username or password';
-      setError(Array.isArray(serverMessage) ? serverMessage[0] : serverMessage);
+
+      const serverMessage = axios.isAxiosError(err)
+        ? err.response?.data?.message || 'Invalid username or password'
+        : 'An unexpected error occurred';
+
+      setError(
+        Array.isArray(serverMessage) ? serverMessage[0] : serverMessage,
+      );
     } finally {
       setLoading(false);
     }
