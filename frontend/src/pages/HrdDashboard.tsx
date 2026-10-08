@@ -89,7 +89,7 @@ export const HrdDashboard: React.FC = () => {
   }
 
   const fetchEmployees = useCallback(
-    async (page = empPagination.page) => {
+    async (page: number) => {
       setLoadingEmployees(true);
       try {
         const params: Record<string, string | number> = {
@@ -103,12 +103,13 @@ export const HrdDashboard: React.FC = () => {
         });
         setEmployees(res.data.data || []);
         if (res.data.meta) {
-          setEmpPagination({
+          setEmpPagination(prev => ({
+            ...prev,
             page: res.data.meta.page,
             limit: res.data.meta.limit,
             total: res.data.meta.total,
             totalPages: res.data.meta.totalPages || 1,
-          });
+          }));
         }
       } catch (err) {
         console.error('Failed to fetch employees', err);
@@ -116,11 +117,11 @@ export const HrdDashboard: React.FC = () => {
         setLoadingEmployees(false);
       }
     },
-    [empSearch, empStatusFilter, empPagination.limit, empPagination.page]
+    [empSearch, empStatusFilter, empPagination.limit]
   );
 
   const fetchAttendances = useCallback(
-    async (page = attPagination.page) => {
+    async (page: number) => {
       setLoadingAttendances(true);
       try {
         const params: Record<string, string | number> = {
@@ -136,12 +137,13 @@ export const HrdDashboard: React.FC = () => {
         });
         setAttendances(res.data.data || []);
         if (res.data.meta) {
-          setAttPagination({
+          setAttPagination(prev => ({
+            ...prev,
             page: res.data.meta.page,
             limit: res.data.meta.limit,
             total: res.data.meta.total,
             totalPages: res.data.meta.totalPages || 1,
-          });
+          }));
         }
       } catch (err) {
         console.error('Failed to fetch attendances', err);
@@ -149,7 +151,7 @@ export const HrdDashboard: React.FC = () => {
         setLoadingAttendances(false);
       }
     },
-    [attStartDate, attEndDate, attStatusFilter, attEmployeeName, attPagination.limit, attPagination.page]
+    [attStartDate, attEndDate, attStatusFilter, attEmployeeName, attPagination.limit]
   );
 
   useEffect(() => {
@@ -158,7 +160,7 @@ export const HrdDashboard: React.FC = () => {
     } else {
       fetchAttendances(1);
     }
-  }, [activeTab, fetchEmployees, fetchAttendances]);
+  }, [activeTab, empSearch, empStatusFilter, attStartDate, attEndDate, attStatusFilter, attEmployeeName, fetchEmployees, fetchAttendances]);
 
   const handleCreateEmployee = async (e: React.SubmitEvent) => {
     e.preventDefault();
