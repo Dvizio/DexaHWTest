@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from '../components/Navbar';
 import { PhotoModal } from '../components/PhotoModal';
 import { apiClient } from '../api/client';
-import type { Employee, Attendance, PaginatedResponse, EmployeeStatus } from '../types';
+import type { Employee, Attendance, PaginatedResponse, EmployeeStatus, User } from '../types';
 import {
   Users,
   ClipboardList,
@@ -79,6 +79,15 @@ export const HrdDashboard: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
 
+  interface CreateEmployeePayload {
+    employee_number: string;
+    name: string;
+    email: string;
+    phone?: string;
+    department?: string;
+    position?: string;
+  }
+
   const fetchEmployees = useCallback(
     async (page = empPagination.page) => {
       setLoadingEmployees(true);
@@ -149,14 +158,14 @@ export const HrdDashboard: React.FC = () => {
     } else {
       fetchAttendances(1);
     }
-  }, [activeTab, empSearch, empStatusFilter, attStartDate, attEndDate, attStatusFilter, attEmployeeName]);
+  }, [activeTab, fetchEmployees, fetchAttendances]);
 
-  const handleCreateEmployee = async (e: React.FormEvent) => {
+  const handleCreateEmployee = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setFormError(null);
     setFormSubmitting(true);
     try {
-      const payload: any = {
+      const payload: CreateEmployeePayload = {
         employee_number: createForm.employee_number.trim(),
         name: createForm.name.trim(),
         email: createForm.email.trim(),
@@ -166,7 +175,7 @@ export const HrdDashboard: React.FC = () => {
       if (createForm.position.trim()) payload.position = createForm.position.trim();
       const res = await apiClient.post<{
         employee: Employee;
-        user: any;
+        user: User;
         temporaryPassword: string;
       }>('/employees', payload);
       setIsCreateOpen(false);
@@ -304,11 +313,10 @@ export const HrdDashboard: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full space-y-6">
         {notification && (
           <div
-            className={`p-4 rounded-md flex items-center justify-between border ${
-              notification.type === 'success'
-                ? 'bg-green-50 border-gray-200 text-black'
-                : 'bg-red-50 border-gray-200 text-black'
-            }`}
+            className={`p-4 rounded-md flex items-center justify-between border ${notification.type === 'success'
+              ? 'bg-green-50 border-gray-200 text-black'
+              : 'bg-red-50 border-gray-200 text-black'
+              }`}
           >
             <div className="flex items-center gap-2.5 text-sm font-medium">
               {notification.type === 'success' ? (
@@ -331,11 +339,10 @@ export const HrdDashboard: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab('employees')}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold transition duration-200 cursor-pointer ${
-                activeTab === 'employees'
-                  ? 'bg-gray-300 text-black  '
-                  : 'bg-gray-50 text-gray-500 hover:text-black hover:bg-gray-300/40 border border-gray-200'
-              }`}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'employees'
+                ? 'bg-gray-300 text-black  '
+                : 'bg-gray-50 text-gray-500 hover:text-black hover:bg-gray-300/40 border border-gray-200'
+                }`}
             >
               <Users className="w-4 h-4" />
               Employee Management
@@ -343,11 +350,10 @@ export const HrdDashboard: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('attendances')}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold transition duration-200 cursor-pointer ${
-                activeTab === 'attendances'
-                  ? 'bg-gray-300 text-black  '
-                  : 'bg-gray-50 text-gray-500 hover:text-black hover:bg-gray-300/40 border border-gray-200'
-              }`}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-bold transition duration-200 cursor-pointer ${activeTab === 'attendances'
+                ? 'bg-gray-300 text-black  '
+                : 'bg-gray-50 text-gray-500 hover:text-black hover:bg-gray-300/40 border border-gray-200'
+                }`}
             >
               <ClipboardList className="w-4 h-4" />
               Attendance Monitoring
