@@ -70,4 +70,29 @@ export class AuthService {
             },
         };
     }
+
+    async refreshToken(refreshToken: string) {
+        try {
+            const refreshSecret = this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET');
+
+            if (!refreshSecret) {
+                throw new Error('Refresh token secret is not configured');
+            }
+
+            const decoded = this.jwtService.verify(refreshToken, { secret: refreshSecret });
+            const payload = {
+                sub: decoded.sub,
+                employeeId: decoded.employeeId,
+                role: decoded.role,
+                username: decoded.username,
+            };
+            const accessToken = this.jwtService.sign(payload);
+            return {
+                access_token: accessToken,
+            };
+        } catch (error) {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
+    }
+
 }
