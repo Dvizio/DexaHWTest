@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity.js';
 import { LoginDto } from './dto/login.dto.js';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
         @InjectRepository(User)
         private userRepository: Repository<User>,
         private jwtService: JwtService,
+        private configService: ConfigService,
     ) { }
 
     async login(loginDto: LoginDto) {
@@ -48,8 +50,18 @@ export class AuthService {
             username: user.username,
         };
 
+        const refreshSecret = this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET');
+        const refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN');
+        const refreshToken = this.jwtService.sign(payload, {
+            secret: refreshSecret,
+            expiresIn: refreshExpiresIn as any,
+        });
+        const accessToken = this.jwtService.sign(payload);
+
+
         return {
-            access_token: this.jwtService.sign(payload),
+            access_token: accessToken,
+            refresh_token: refreshToken,
             user: {
                 id: user.id,
                 username: user.username,
