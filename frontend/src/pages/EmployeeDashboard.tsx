@@ -12,6 +12,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { EmployeeAttendanceHistorySection } from '../components/EmployeeAttendanceHistorySection';
+import { ChangePasswordModal } from '../components/ChangePasswordModal';
 
 export const EmployeeDashboard: React.FC = () => {
   const [profile, setProfile] = useState<Employee | null>(null);
@@ -34,13 +35,6 @@ export const EmployeeDashboard: React.FC = () => {
   const [webcamType, setWebcamType] = useState<'check-in' | 'check-out'>('check-in');
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
-  const [passwordForm, setPasswordForm] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
-  const [passwordLoading, setPasswordLoading] = useState<boolean>(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // Loading & Alert states
   const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
@@ -282,129 +276,17 @@ export const EmployeeDashboard: React.FC = () => {
       />
 
       {/* Change Password Modal */}
-      {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-fadeIn">
-          <div className="bg-gray-50 border border-gray-200 w-full max-w-sm rounded-md p-6 relative">
-            <h3 className="text-base font-bold text-black mb-2">Change Password</h3>
-
-            {passwordError && (
-              <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-md text-xs text-black">
-                {passwordError}
-              </div>
-            )}
-
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setPasswordLoading(true);
-                setPasswordError(null);
-
-                if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-                  setPasswordError('New passwords do not match');
-                  setPasswordLoading(false);
-                  return;
-                }
-
-                if (passwordForm.newPassword.length < 6) {
-                  setPasswordError('New password must be at least 6 characters');
-                  setPasswordLoading(false);
-                  return;
-                }
-
-                try {
-                  await apiClient.post('/employees/change-password', {
-                    oldPassword: passwordForm.oldPassword,
-                    newPassword: passwordForm.newPassword,
-                  });
-                  setActionAlert({
-                    type: 'success',
-                    message: 'Password updated successfully!',
-                  });
-                  setIsPasswordModalOpen(false);
-                  setPasswordForm({
-                    oldPassword: '',
-                    newPassword: '',
-                    confirmPassword: '',
-                  });
-                } catch (err: unknown) {
-                  const message = axios.isAxiosError(err)
-                    ? err.response?.data?.message
-                    : undefined;
-
-                  setPasswordError(message || 'Failed to change password');
-                } finally {
-                  setPasswordLoading(false);
-                }
-              }}
-            >
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-black mb-1">
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={passwordForm.oldPassword}
-                    onChange={(e) =>
-                      setPasswordForm({ ...passwordForm, oldPassword: e.target.value })
-                    }
-                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-black mb-1">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={passwordForm.newPassword}
-                    onChange={(e) =>
-                      setPasswordForm({ ...passwordForm, newPassword: e.target.value })
-                    }
-                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-black mb-1">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={passwordForm.confirmPassword}
-                    onChange={(e) =>
-                      setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
-                    }
-                    className="w-full bg-white border border-gray-200 rounded-md px-3 py-2 text-xs text-black focus:outline-none focus:border-black"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsPasswordModalOpen(false)}
-                  disabled={passwordLoading}
-                  className="px-4 py-2 bg-gray-300/40 hover:bg-[#C5B5A9] text-black rounded-md text-xs font-semibold transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={passwordLoading}
-                  className="px-4 py-2 bg-gray-300 hover:bg-[#C5B5A9] text-black disabled:opacity-60 rounded-md text-xs font-semibold transition"
-                >
-                  {passwordLoading ? 'Updating...' : 'Update Password'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        onSuccess={(msg) => {
+          setActionAlert({
+            type: 'success',
+            message: msg,
+          });
+          setIsPasswordModalOpen(false);
+        }}
+      />
     </div>
   );
 };
